@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"strconv"
+
 	inspectors "zerok.ai/langdetector/inspectors"
 	"zerok.ai/langdetector/process"
 	types "zerok.ai/langdetector/types"
@@ -17,7 +19,9 @@ func FindLang(targetPodUID string, targetContainers []string, image string) {
 			log.Fatalf("could not find processes, error: %s\n", err)
 		}
 
-		fmt.Println(processes)
+		for i := 0; i < len(processes); i++ {
+			fmt.Println(convertProcessDetailsToString(processes[i]))
+		}
 
 		processResults, processName := inspectors.DetectLanguage(processes)
 		log.Printf("detection result: %s\n", processResults)
@@ -32,4 +36,8 @@ func FindLang(targetPodUID string, targetContainers []string, image string) {
 		}
 	}
 	fmt.Println(containerResults)
+}
+
+func convertProcessDetailsToString(process process.ProcessDetails) string {
+	return strconv.Itoa(process.ProcessID) + "," + process.CmdLine + "," + process.ExeName
 }
