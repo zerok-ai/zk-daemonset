@@ -12,15 +12,13 @@ import (
 )
 
 func main() {
-	injectorClient := zkclient.InjectorClient{
+	injectorClient := &zkclient.InjectorClient{
 		ContainerResults: []types.ContainerRuntime{},
 	}
 	fmt.Println("Start lang detection.")
 	result := parseArgs()
 	fmt.Println("The args are ", result)
-	containerResults := detector.GetContainerResultsForAllPods()
-	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
-	injectorClient.SyncDataWithInjector()
+	detector.ReScanPods(injectorClient)
 	server.StartServer()
 }
 

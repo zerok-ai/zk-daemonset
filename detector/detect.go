@@ -11,7 +11,14 @@ import (
 	"zerok.ai/deamonset/process"
 	types "zerok.ai/deamonset/types"
 	utils "zerok.ai/deamonset/utils"
+	zkclient "zerok.ai/deamonset/zkclient"
 )
+
+func ReScanPods(injectorClient *zkclient.InjectorClient) {
+	containerResults := GetContainerResultsForAllPods()
+	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
+	injectorClient.SyncDataWithInjector()
+}
 
 func GetContainerResultsForAllPods() []types.ContainerRuntime {
 	podList := utils.GetPodsInCurrentNode()
