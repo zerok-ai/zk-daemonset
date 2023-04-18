@@ -53,7 +53,7 @@ metadata:
   labels:
     app: zerok-deamonset
 rules:
-- apiGroups: ["v1",""]
+- apiGroups: [""]
   resources: ["pods"]
   verbs: ["create", "get", "delete", "list", "patch", "update", "watch"]
 

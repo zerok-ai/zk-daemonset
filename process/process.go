@@ -1,6 +1,7 @@
 package process
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -61,6 +62,7 @@ func FindProcessInContainer(podUID string, containerName string) ([]types.Proces
 					if err != nil {
 						cmd = ""
 					} else {
+						cmdLine = bytes.ReplaceAll(cmdLine, []byte{0}, []byte(" "))
 						cmd = string(cmdLine)
 					}
 
