@@ -5,18 +5,15 @@ import (
 	"fmt"
 	"strings"
 
-	"zerok.ai/langdetector/detector"
-	server "zerok.ai/langdetector/server"
-	//"zerok.ai/langdetector/utils"
+	"zerok.ai/deamonset/detector"
+	server "zerok.ai/deamonset/server"
 )
 
 func main() {
-	// node := utils.GetCurrentNodeName()
-	// fmt.Println("Node is ", node)
 	fmt.Println("Start lang detection.")
 	result := parseArgs()
 	fmt.Println("The args are ", result)
-	detector.FindLang(result.PodUID, result.Containers, result.Image)
+	detector.GetContainerResultsForAllPods()
 	server.StartServer()
 }
 

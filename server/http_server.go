@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	detector "zerok.ai/langdetector/detector"
 )
 
 type LangDetect struct {
@@ -25,7 +23,7 @@ func StartServer() {
 			fmt.Println("Error unmarshaling data from request.")
 			w.WriteHeader(500)
 		} else {
-			detector.FindLang(result.PodUID, result.Containers, result.Image)
+			//detector.FindLang(result.PodUID, result.Containers, result.Image)
 			w.WriteHeader(200)
 			w.Write([]byte("Done"))
 		}

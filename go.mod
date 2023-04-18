@@ -1,4 +1,4 @@
-module zerok.ai/langdetector
+module zerok.ai/deamonset
 
 go 1.19
 

@@ -1,15 +1,15 @@
-NAME = zerok-langdetector
+NAME = zerok-deamonset
 PROJECT_ID ?= zerok-dev
 REPOSITORY ?= stage
 LOCATION ?= us-west1
 IMAGE_PREFIX = $(LOCATION)-docker.pkg.dev/$(PROJECT_ID)/$(REPOSITORY)
-IMAGE_NAME = zerok-langdetector
+IMAGE_NAME = zerok-deamonset
 IMAGE_VERSION = test
 
 export GO111MODULE=on
 
 build: sync
-	go build -v -o $(NAME) cmd/main.go
+	go build -v -o $(NAME) main.go
 
 sync:
 	go get -v ./...

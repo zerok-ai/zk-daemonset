@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"zerok.ai/langdetector/process"
-	types "zerok.ai/langdetector/types"
+	"zerok.ai/deamonset/process"
+	types "zerok.ai/deamonset/types"
 )
 
 type javaInspector struct{}
