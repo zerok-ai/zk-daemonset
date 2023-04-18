@@ -54,12 +54,6 @@ metadata:
   labels:
     app: zerok-deamonset
 rules:
-- apiGroups: ["admissionregistration.k8s.io"]
-  resources: ["mutatingwebhookconfigurations"]
-  verbs: ["create", "get", "delete", "list", "patch", "update", "watch"]
-- apiGroups: ["v1",""]
-  resources: ["secrets"]
-  verbs: ["create", "get", "delete", "list", "patch", "update", "watch"]
 - apiGroups: ["v1",""]
   resources: ["pods"]
   verbs: ["create", "get", "delete", "list", "patch", "update", "watch"]

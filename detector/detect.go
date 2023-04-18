@@ -13,16 +13,19 @@ import (
 	utils "zerok.ai/deamonset/utils"
 )
 
-func GetContainerResultsForAllPods() {
+func GetContainerResultsForAllPods() []types.ContainerRuntime {
 	podList := utils.GetPodsInCurrentNode()
 	fmt.Println("Pods are ", podList)
+	containerResults := []types.ContainerRuntime{}
 	for _, pod := range podList.Items {
-		FindLang(string(pod.UID), pod.Spec.Containers, "")
+		temp := FindLang(string(pod.UID), pod.Spec.Containers, "")
+		containerResults = append(containerResults, temp...)
 	}
+	return containerResults
 }
 
-func FindLang(targetPodUID string, targetContainers []v1.Container, image string) {
-	var containerResults []types.ContainerLanguage
+func FindLang(targetPodUID string, targetContainers []v1.Container, image string) []types.ContainerRuntime {
+	var containerResults []types.ContainerRuntime
 	fmt.Println("Container Names is ", targetContainers)
 	for _, container := range targetContainers {
 		containerName := container.Name
@@ -37,21 +40,20 @@ func FindLang(targetPodUID string, targetContainers []v1.Container, image string
 			fmt.Println(convertProcessDetailsToString(processes[i]))
 		}
 
-		processResults, processName := inspectors.DetectLanguage(processes)
-		log.Printf("detection result: %s\n", processResults)
+		processes = inspectors.DetectLanguage(processes)
 
-		if len(processResults) > 0 {
-			containerResults = append(containerResults, types.ContainerLanguage{
-				ContainerName: containerName,
-				Language:      processResults[0],
-				ProcessName:   processName,
-				Image:         image,
-			})
-		}
+		containerResults = append(containerResults, types.ContainerRuntime{
+			ContainerName: containerName,
+			Image:         image,
+			Process:       processes,
+			PodUID:        targetPodUID,
+		})
+
 	}
 	fmt.Println(containerResults)
+	return containerResults
 }
 
-func convertProcessDetailsToString(process process.ProcessDetails) string {
+func convertProcessDetailsToString(process types.ProcessDetails) string {
 	return strconv.Itoa(process.ProcessID) + "," + process.CmdLine + "," + process.ExeName
 }

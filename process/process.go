@@ -9,21 +9,16 @@ import (
 	"strings"
 
 	"github.com/fntlnz/mountinfo"
+	types "zerok.ai/deamonset/types"
 )
 
-type ProcessDetails struct {
-	ProcessID int
-	ExeName   string
-	CmdLine   string
-}
-
-func FindProcessInContainer(podUID string, containerName string) ([]ProcessDetails, error) {
+func FindProcessInContainer(podUID string, containerName string) ([]types.ProcessDetails, error) {
 	procFile, err := os.Open("/proc")
 	if err != nil {
 		return nil, err
 	}
 
-	var result []ProcessDetails
+	var result []types.ProcessDetails
 	for {
 		dirs, err := procFile.Readdir(15)
 		if err == io.EOF {
@@ -69,7 +64,7 @@ func FindProcessInContainer(podUID string, containerName string) ([]ProcessDetai
 						cmd = string(cmdLine)
 					}
 
-					result = append(result, ProcessDetails{
+					result = append(result, types.ProcessDetails{
 						ProcessID: pid,
 						ExeName:   exeName,
 						CmdLine:   cmd,

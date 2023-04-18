@@ -7,13 +7,20 @@ import (
 
 	"zerok.ai/deamonset/detector"
 	server "zerok.ai/deamonset/server"
+	types "zerok.ai/deamonset/types"
+	zkclient "zerok.ai/deamonset/zkclient"
 )
 
 func main() {
+	injectorClient := zkclient.InjectorClient{
+		ContainerResults: []types.ContainerRuntime{},
+	}
 	fmt.Println("Start lang detection.")
 	result := parseArgs()
 	fmt.Println("The args are ", result)
-	detector.GetContainerResultsForAllPods()
+	containerResults := detector.GetContainerResultsForAllPods()
+	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
+	injectorClient.SyncDataWithInjector()
 	server.StartServer()
 }
 

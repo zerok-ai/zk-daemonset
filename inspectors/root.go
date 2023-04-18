@@ -1,31 +1,34 @@
 package inspectors
 
 import (
-	"zerok.ai/deamonset/process"
 	types "zerok.ai/deamonset/types"
 )
 
 type inspector interface {
-	Inspect(process *process.ProcessDetails) (types.ProgrammingLanguage, bool)
+	Inspect(process *types.ProcessDetails) (types.ProgrammingLanguage, bool)
 }
 
 var inspectorsList = []inspector{java, nodeJs, python}
 
-func DetectLanguage(processes []process.ProcessDetails) ([]types.ProgrammingLanguage, string) {
-	var result []types.ProgrammingLanguage
+func DetectLanguage(processes []types.ProcessDetails) []types.ProcessDetails {
 	processName := ""
+	results := []types.ProcessDetails{}
 	for _, p := range processes {
+		p.ProcessName = processName
+		p.Runtime = types.UknownLanguage
 		for _, i := range inspectorsList {
 			inspectionResult, detected := i.Inspect(&p)
 			if detected {
-				result = append(result, inspectionResult)
 				if inspectionResult == types.GoProgrammingLanguage {
 					processName = p.ExeName
 				}
+				p.ProcessName = processName
+				p.Runtime = inspectionResult
+
 				break
 			}
 		}
+		results = append(results, p)
 	}
-
-	return result, processName
+	return results
 }

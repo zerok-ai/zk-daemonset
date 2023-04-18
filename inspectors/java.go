@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"zerok.ai/deamonset/process"
 	types "zerok.ai/deamonset/types"
 )
 
@@ -16,7 +15,7 @@ var java = &javaInspector{}
 const processName = "java"
 const hsperfdataDirName = "hsperfdata"
 
-func (j *javaInspector) Inspect(p *process.ProcessDetails) (types.ProgrammingLanguage, bool) {
+func (j *javaInspector) Inspect(p *types.ProcessDetails) (types.ProgrammingLanguage, bool) {
 	if strings.Contains(p.ExeName, processName) || strings.Contains(p.CmdLine, processName) {
 		return types.JavaProgrammingLanguage, true
 	}

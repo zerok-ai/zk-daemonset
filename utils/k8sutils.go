@@ -14,7 +14,7 @@ import (
 func GetPodsInCurrentNode() *corev1.PodList {
 	clientset := getK8sClient()
 	node := getCurrentNodeName()
-	fmt.Println("Current node name ", node)
+	fmt.Println(node)
 	pods, _ := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 		FieldSelector: "spec.nodeName=" + node,
 	})
