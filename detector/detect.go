@@ -43,11 +43,11 @@ func FindLang(targetPodUID string, targetContainers []v1.Container, image string
 			log.Fatalf("could not find processes, error: %s\n", err)
 		}
 
+		processes = inspectors.DetectLanguage(processes)
+
 		for i := 0; i < len(processes); i++ {
 			fmt.Println(convertProcessDetailsToString(processes[i]))
 		}
-
-		processes = inspectors.DetectLanguage(processes)
 
 		containerResults = append(containerResults, types.ContainerRuntime{
 			ContainerName: containerName,
@@ -62,5 +62,5 @@ func FindLang(targetPodUID string, targetContainers []v1.Container, image string
 }
 
 func convertProcessDetailsToString(process types.ProcessDetails) string {
-	return strconv.Itoa(process.ProcessID) + "," + process.CmdLine + "," + process.ExeName
+	return strconv.Itoa(process.ProcessID) + "," + process.CmdLine + "," + process.ExeName + "," + string(process.Runtime)
 }

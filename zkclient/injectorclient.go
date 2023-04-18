@@ -3,18 +3,23 @@ package zkclient
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	types "zerok.ai/deamonset/types"
 )
 
-var injectorendpoint = "zerok-injector.zerok-injector.svc.cluster.local:8444/sync-runtime"
+var injectorendpoint = "http://zerok-injector.zerok-injector.svc.cluster.local:8444/sync-runtime"
 
 type InjectorClient struct {
 	ContainerResults []types.ContainerRuntime
 }
 
 func (h *InjectorClient) SyncDataWithInjector() {
+	if len(h.ContainerResults) == 0 {
+		fmt.Println("Len of container results is 0.Hence skipping sync.")
+		return
+	}
 	containerResults := h.ContainerResults
 	h.ContainerResults = []types.ContainerRuntime{}
 	requestPayload := types.RuntimeSyncRequest{RuntimeDetails: containerResults}
