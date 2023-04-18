@@ -10,9 +10,9 @@ import (
 )
 
 type LangDetect struct {
-	PodName   string `json:"name"`
-	Container string `json:"cont"`
-	Image     string `json:"image"`
+	PodUID     string   `json:"name"`
+	Containers []string `json:"cont"`
+	Image      string   `json:"image"`
 }
 
 func StartServer() {
@@ -20,12 +20,12 @@ func StartServer() {
 		body, _ := io.ReadAll(r.Body)
 		var result LangDetect
 		err := json.Unmarshal(body, &result)
-		fmt.Println(result.PodName, result.Container)
+		fmt.Println(result.PodUID, result.Containers)
 		if err != nil {
 			fmt.Println("Error unmarshaling data from request.")
 			w.WriteHeader(500)
 		} else {
-			detector.FindLang(result.PodName, []string{result.Container}, result.Image)
+			detector.FindLang(result.PodUID, result.Containers, result.Image)
 			w.WriteHeader(200)
 			w.Write([]byte("Done"))
 		}

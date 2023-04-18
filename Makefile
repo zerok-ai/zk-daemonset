@@ -1,5 +1,8 @@
 NAME = zerok-langdetector
-IMAGE_PREFIX = rajeevzerok
+PROJECT_ID ?= zerok-dev
+REPOSITORY ?= stage
+LOCATION ?= us-west1
+IMAGE_PREFIX = $(LOCATION)-docker.pkg.dev/$(PROJECT_ID)/$(REPOSITORY)
 IMAGE_NAME = zerok-langdetector
 IMAGE_VERSION = test
 

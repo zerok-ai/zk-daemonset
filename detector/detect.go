@@ -13,8 +13,11 @@ import (
 
 func FindLang(targetPodUID string, targetContainers []string, image string) {
 	var containerResults []types.ContainerLanguage
+	fmt.Println("Container Names is ", targetContainers)
 	for _, containerName := range targetContainers {
+		fmt.Println("Container Name is ", containerName)
 		processes, err := process.FindProcessInContainer(targetPodUID, containerName)
+		fmt.Println("processes are ", processes)
 		if err != nil {
 			log.Fatalf("could not find processes, error: %s\n", err)
 		}
