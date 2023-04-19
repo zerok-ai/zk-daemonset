@@ -11,12 +11,6 @@ import (
 	zkclient "zerok.ai/deamonset/zkclient"
 )
 
-func ScanAllPods(injectorClient *zkclient.InjectorClient) {
-	containerResults := GetContainerResultsForAllPods(true)
-	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
-	injectorClient.SyncDataWithInjector()
-}
-
 func ReScanPods(injectorClient *zkclient.InjectorClient) {
 	containerResults := GetContainerResultsForAllPods(false)
 	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
