@@ -39,6 +39,7 @@ func FindLang(pod *v1.Pod, targetContainers []v1.Container) []common.ContainerRu
 			continue
 		}
 		processes = inspectors.DetectLanguage(processes)
+		fmt.Println(processes)
 		containerResults = append(containerResults, common.ContainerRuntime{
 			ContainerName: containerName,
 			Image:         container.Image,

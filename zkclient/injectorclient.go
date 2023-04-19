@@ -28,20 +28,18 @@ func (h *InjectorClient) SyncDataWithInjector() {
 	json.NewEncoder(reqBodyBytes).Encode(requestPayload)
 	r, err := http.NewRequest("POST", injectorendpoint, bytes.NewBuffer(reqBodyBytes.Bytes()))
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while creting the reqeust")
+		return
 	}
 	r.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}
 	res, err := client.Do(r)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error while creting the reqeust")
+		return
 	}
 
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		//Adding back container results for next sync.
-		h.ContainerResults = append(h.ContainerResults, containerResults...)
-	}
 }
