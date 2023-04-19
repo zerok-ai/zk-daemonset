@@ -3,7 +3,7 @@ package inspectors
 import (
 	"strings"
 
-	types "zerok.ai/deamonset/types"
+	types "zerok.ai/deamonset/common"
 )
 
 type nodejsInspector struct{}

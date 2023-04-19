@@ -1,7 +1,7 @@
 package inspectors
 
 import (
-	types "zerok.ai/deamonset/types"
+	types "zerok.ai/deamonset/common"
 )
 
 type inspector interface {

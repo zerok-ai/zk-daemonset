@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/fntlnz/mountinfo"
-	types "zerok.ai/deamonset/types"
+	types "zerok.ai/deamonset/common"
 )
 
 func FindProcessInContainer(podUID string, containerName string) ([]types.ProcessDetails, error) {

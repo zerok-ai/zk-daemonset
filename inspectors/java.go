@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	types "zerok.ai/deamonset/types"
+	types "zerok.ai/deamonset/common"
 )
 
 type javaInspector struct{}
