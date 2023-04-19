@@ -46,8 +46,6 @@ func FindLang(pod *v1.Pod, targetContainers []v1.Container) []common.ContainerRu
 			PodUID:        targetPodUID,
 		})
 
-		utils.LabelPod(pod, common.ZkOrchStatusPath, common.ZkOrchScanned)
-
 	}
 	fmt.Println(containerResults)
 	return containerResults
