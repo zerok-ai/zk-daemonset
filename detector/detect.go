@@ -25,20 +25,18 @@ func GetContainerResultsForAllPods() []types.ContainerRuntime {
 	fmt.Println("Pods are ", podList)
 	containerResults := []types.ContainerRuntime{}
 	for _, pod := range podList.Items {
-		temp := FindLang(string(pod.UID), pod.Spec.Containers, "")
+		temp := FindLang(string(pod.UID), pod.Spec.Containers)
 		containerResults = append(containerResults, temp...)
 	}
 	return containerResults
 }
 
-func FindLang(targetPodUID string, targetContainers []v1.Container, image string) []types.ContainerRuntime {
+func FindLang(targetPodUID string, targetContainers []v1.Container) []types.ContainerRuntime {
 	var containerResults []types.ContainerRuntime
-	fmt.Println("Container Names is ", targetContainers)
 	for _, container := range targetContainers {
+		fmt.Println("Container name is ", container.Name)
 		containerName := container.Name
-		fmt.Println("Container Name is ", containerName)
 		processes, err := process.FindProcessInContainer(targetPodUID, containerName)
-		fmt.Println("processes are ", processes)
 		if err != nil {
 			log.Fatalf("could not find processes, error: %s\n", err)
 		}
@@ -51,7 +49,7 @@ func FindLang(targetPodUID string, targetContainers []v1.Container, image string
 
 		containerResults = append(containerResults, types.ContainerRuntime{
 			ContainerName: containerName,
-			Image:         image,
+			Image:         container.Image,
 			Process:       processes,
 			PodUID:        targetPodUID,
 		})

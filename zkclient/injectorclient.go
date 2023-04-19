@@ -23,6 +23,7 @@ func (h *InjectorClient) SyncDataWithInjector() {
 	containerResults := h.ContainerResults
 	h.ContainerResults = []types.ContainerRuntime{}
 	requestPayload := types.RuntimeSyncRequest{RuntimeDetails: containerResults}
+	fmt.Println(requestPayload)
 	reqBodyBytes := new(bytes.Buffer)
 	json.NewEncoder(reqBodyBytes).Encode(requestPayload)
 	r, err := http.NewRequest("POST", injectorendpoint, bytes.NewBuffer(reqBodyBytes.Bytes()))
