@@ -22,7 +22,7 @@ type patchStringValue struct {
 }
 
 func LabelPod(pod *corev1.Pod, path string, value string) {
-	k8sClient := getK8sClient().CoreV1()
+	k8sClient := GetK8sClientSet().CoreV1()
 	payload := []patchStringValue{{
 		Op:    "replace",
 		Path:  path,
@@ -39,8 +39,8 @@ func LabelPod(pod *corev1.Pod, path string, value string) {
 }
 
 func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
-	clientset := getK8sClient()
-	node := getCurrentNodeName()
+	clientset := GetK8sClientSet()
+	node := GetCurrentNodeName()
 	fmt.Println(node)
 	var pods *corev1.PodList
 	if allPods {
@@ -56,11 +56,11 @@ func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
 	return pods
 }
 
-func getCurrentNodeName() string {
+func GetCurrentNodeName() string {
 	return os.Getenv("MY_NODE_NAME")
 }
 
-func getK8sClient() *kubernetes.Clientset {
+func GetK8sClientSet() *kubernetes.Clientset {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err.Error())
