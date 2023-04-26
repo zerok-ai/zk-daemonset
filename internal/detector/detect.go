@@ -2,6 +2,11 @@ package detector
 
 import (
 	"context"
+	"deamonset/internal/inspectors"
+	"deamonset/internal/k8utils"
+	"deamonset/internal/models"
+	"deamonset/internal/process"
+	"deamonset/pkg/zkclient/controller"
 	"fmt"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -9,22 +14,17 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"time"
-	common "zerok.ai/deamonset/common"
-	inspectors "zerok.ai/deamonset/inspectors"
-	"zerok.ai/deamonset/process"
-	utils "zerok.ai/deamonset/utils"
-	zkclient "zerok.ai/deamonset/zkclient"
 )
 
-func ScanExistingPods(injectorClient *zkclient.InjectorClient) {
+func ScanExistingPods(injectorClient *controller.InjectorClient) {
 	containerResults := GetContainerResultsForAllPods(false)
 	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
 	injectorClient.SyncDataWithInjector()
 }
 
-func AddWatcherToPods(injectorClient *zkclient.InjectorClient) {
+func AddWatcherToPods(injectorClient *controller.InjectorClient) {
 
-	clientSet := utils.GetK8sClientSet()
+	clientSet := k8utils.GetK8sClientSet()
 
 	// create a context and a workqueue
 	ctx := context.Background()
@@ -45,7 +45,7 @@ func AddWatcherToPods(injectorClient *zkclient.InjectorClient) {
 }
 
 // handlePodEvent handles pod events
-func handlePodEvent(obj interface{}, injectorClient *zkclient.InjectorClient) {
+func handlePodEvent(obj interface{}, injectorClient *controller.InjectorClient) {
 
 	pod := obj.(*v1.Pod)
 	fmt.Printf("handling Pod event for %s/%s on node %s\n", pod.Namespace, pod.Name, pod.Spec.NodeName)
@@ -61,7 +61,7 @@ func handlePodEvent(obj interface{}, injectorClient *zkclient.InjectorClient) {
 func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workqueue.RateLimitingInterface) {
 
 	// get the name of the current node
-	node := utils.GetCurrentNodeName()
+	node := k8utils.GetCurrentNodeName()
 
 	// Create a field selector to watch for pods on a specific node
 	selector := fields.SelectorFromSet(fields.Set{"spec.nodeName": node})
@@ -86,10 +86,10 @@ func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workq
 	go controller.Run(ctx.Done())
 }
 
-func GetContainerResultsForAllPods(allPods bool) []common.ContainerRuntime {
-	podList := utils.GetPodsInCurrentNode(allPods)
+func GetContainerResultsForAllPods(allPods bool) []models.ContainerRuntime {
+	podList := k8utils.GetPodsInCurrentNode(allPods)
 	fmt.Println("Pods are ", podList)
-	containerResults := []common.ContainerRuntime{}
+	containerResults := []models.ContainerRuntime{}
 	for _, pod := range podList.Items {
 		temp := FindLang(&pod, pod.Status.ContainerStatuses)
 		containerResults = append(containerResults, temp...)
@@ -97,9 +97,9 @@ func GetContainerResultsForAllPods(allPods bool) []common.ContainerRuntime {
 	return containerResults
 }
 
-func FindLang(pod *v1.Pod, targetContainers []v1.ContainerStatus) []common.ContainerRuntime {
+func FindLang(pod *v1.Pod, targetContainers []v1.ContainerStatus) []models.ContainerRuntime {
 	targetPodUID := string(pod.UID)
-	var containerResults []common.ContainerRuntime
+	var containerResults []models.ContainerRuntime
 	for _, container := range targetContainers {
 		containerName := container.Name
 
@@ -110,7 +110,7 @@ func FindLang(pod *v1.Pod, targetContainers []v1.ContainerStatus) []common.Conta
 		}
 		processes = inspectors.DetectLanguage(processes)
 		fmt.Println(processes)
-		containerResults = append(containerResults, common.ContainerRuntime{
+		containerResults = append(containerResults, models.ContainerRuntime{
 			ContainerName: containerName,
 			Image:         container.Image,
 			ImageID:       container.ImageID,

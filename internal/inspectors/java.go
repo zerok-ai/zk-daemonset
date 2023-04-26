@@ -1,11 +1,10 @@
 package inspectors
 
 import (
+	types "deamonset/internal/models"
 	"fmt"
 	"os"
 	"strings"
-
-	types "zerok.ai/deamonset/common"
 )
 
 type javaInspector struct{}

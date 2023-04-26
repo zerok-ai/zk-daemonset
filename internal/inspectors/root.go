@@ -1,7 +1,7 @@
 package inspectors
 
 import (
-	types "zerok.ai/deamonset/common"
+	types "deamonset/internal/models"
 )
 
 type inspector interface {
@@ -15,7 +15,7 @@ func DetectLanguage(processes []types.ProcessDetails) []types.ProcessDetails {
 	results := []types.ProcessDetails{}
 	for _, p := range processes {
 		p.ProcessName = processName
-		p.Runtime = types.UknownLanguage
+		p.Runtime = types.UnknownLanguage
 		for _, i := range inspectorsList {
 			inspectionResult, detected := i.Inspect(&p)
 			if detected {

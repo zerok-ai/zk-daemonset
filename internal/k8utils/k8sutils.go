@@ -1,7 +1,8 @@
-package utils
+package k8utils
 
 import (
 	"context"
+	"deamonset/internal/models"
 	"fmt"
 	"os"
 
@@ -12,7 +13,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"zerok.ai/deamonset/common"
 )
 
 type patchStringValue struct {
@@ -50,7 +50,7 @@ func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
 	} else {
 		pods, _ = clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 			FieldSelector: "spec.nodeName=" + node,
-			LabelSelector: common.ZkOrchStatusKey + "!=" + common.ZkOrchScanned,
+			LabelSelector: models.ZkOrchStatusKey + "!=" + models.ZkOrchScanned,
 		})
 	}
 	return pods

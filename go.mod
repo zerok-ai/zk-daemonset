@@ -1,4 +1,4 @@
-module zerok.ai/deamonset
+module deamonset
 
 go 1.19
 

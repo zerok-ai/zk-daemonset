@@ -1,9 +1,8 @@
 package inspectors
 
 import (
+	types "deamonset/internal/models"
 	"strings"
-
-	types "zerok.ai/deamonset/common"
 )
 
 type pythonInspector struct{}

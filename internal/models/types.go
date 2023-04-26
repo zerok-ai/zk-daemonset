@@ -1,4 +1,4 @@
-package common
+package models
 
 type ProcessDetails struct {
 	ProcessID   int                 `json:"pid"`
@@ -9,15 +9,6 @@ type ProcessDetails struct {
 }
 
 type ProgrammingLanguage string
-
-const (
-	JavaProgrammingLanguage       ProgrammingLanguage = "java"
-	PythonProgrammingLanguage     ProgrammingLanguage = "python"
-	GoProgrammingLanguage         ProgrammingLanguage = "go"
-	DotNetProgrammingLanguage     ProgrammingLanguage = "dotnet"
-	JavascriptProgrammingLanguage ProgrammingLanguage = "javascript"
-	UknownLanguage                ProgrammingLanguage = "unknown"
-)
 
 type ContainerRuntime struct {
 	PodUID        string           `json:"uid"`

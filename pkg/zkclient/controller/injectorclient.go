@@ -1,12 +1,11 @@
-package zkclient
+package controller
 
 import (
 	"bytes"
+	types "deamonset/internal/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	types "zerok.ai/deamonset/common"
 )
 
 var injectorendpoint = "http://zerok-injector.zerok-injector.svc.cluster.local:8444/sync-runtime"

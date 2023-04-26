@@ -2,6 +2,7 @@ package process
 
 import (
 	"bytes"
+	types "deamonset/internal/models"
 	"fmt"
 	"io"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/fntlnz/mountinfo"
-	types "zerok.ai/deamonset/common"
 )
 
 func FindProcessInContainer(podUID string, containerName string) ([]types.ProcessDetails, error) {
