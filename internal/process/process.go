@@ -2,13 +2,13 @@ package process
 
 import (
 	"bytes"
-	types "deamonset/internal/models"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+	types "zerok-deamonset/internal/models"
 
 	"github.com/fntlnz/mountinfo"
 )

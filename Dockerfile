@@ -11,4 +11,5 @@ RUN make build
 FROM alpine:3.17
 WORKDIR /zerok-deamonset
 COPY --from=build /go/src/zerok-deamonset/zerok-deamonset .
-CMD ["/zerok-deamonset/zerok-deamonset"]
+COPY internal/config/config.yaml /zerok-deamonset/
+CMD ["/zerok-deamonset/zerok-deamonset", "-c", "/zerok-deamonset/config.yaml"]

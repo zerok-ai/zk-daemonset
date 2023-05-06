@@ -1,8 +1,8 @@
 package inspectors
 
 import (
-	types "deamonset/internal/models"
 	"strings"
+	types "zerok-deamonset/internal/models"
 )
 
 type nodejsInspector struct{}

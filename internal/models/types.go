@@ -18,6 +18,38 @@ type ContainerRuntime struct {
 	Process       []ProcessDetails `json:"process"`
 }
 
+//type ContainerRuntime struct {
+//	Image    string `json:"image"`
+//	ImageID  string `json:"imageId"`
+//	Language string `json:"language"`
+//}
+
+func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
+	if cr.PodUID != newContainerRuntime.PodUID {
+		return false
+	}
+
+	if cr.ContainerName != newContainerRuntime.ContainerName {
+		return false
+	}
+
+	if cr.Image != newContainerRuntime.Image {
+		return false
+	}
+
+	if cr.ImageID != newContainerRuntime.ImageID {
+		return false
+	}
+
+	return true
+}
+
+//type ContainerRuntime struct {
+//	Image    string `json:"image"`
+//	ImageID  string `json:"imageId"`
+//	Language string `json:"language"`
+//}
+
 type RuntimeSyncRequest struct {
 	RuntimeDetails []ContainerRuntime `json:"details"`
 }

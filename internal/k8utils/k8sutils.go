@@ -2,9 +2,9 @@ package k8utils
 
 import (
 	"context"
-	"deamonset/internal/models"
 	"fmt"
 	"os"
+	"zerok-deamonset/internal/models"
 
 	"encoding/json"
 
@@ -39,16 +39,16 @@ func LabelPod(pod *corev1.Pod, path string, value string) {
 }
 
 func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
-	clientset := GetK8sClientSet()
+	clientSet := GetK8sClientSet()
 	node := GetCurrentNodeName()
 	fmt.Println(node)
 	var pods *corev1.PodList
 	if allPods {
-		pods, _ = clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		pods, _ = clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 			FieldSelector: "spec.nodeName=" + node,
 		})
 	} else {
-		pods, _ = clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		pods, _ = clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
 			FieldSelector: "spec.nodeName=" + node,
 			LabelSelector: models.ZkOrchStatusKey + "!=" + models.ZkOrchScanned,
 		})

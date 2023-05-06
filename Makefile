@@ -9,7 +9,7 @@ IMAGE_VERSION = test
 export GO111MODULE=on
 
 build: sync
-	go build -v -o $(NAME) main.go
+	go build -v -o $(NAME) cmd/main.go
 
 sync:
 	go get -v ./...

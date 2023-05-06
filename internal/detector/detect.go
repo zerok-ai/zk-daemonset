@@ -2,11 +2,6 @@ package detector
 
 import (
 	"context"
-	"deamonset/internal/inspectors"
-	"deamonset/internal/k8utils"
-	"deamonset/internal/models"
-	"deamonset/internal/process"
-	"deamonset/pkg/zkclient/controller"
 	"fmt"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -14,12 +9,75 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"time"
+	"zerok-deamonset/internal/config"
+	"zerok-deamonset/internal/inspectors"
+	"zerok-deamonset/internal/k8utils"
+	"zerok-deamonset/internal/models"
+	"zerok-deamonset/internal/process"
+	"zerok-deamonset/pkg/storage"
+	"zerok-deamonset/pkg/zkclient/controller"
+
+	types "zerok-deamonset/internal/models"
 )
 
+var (
+	ImageStore *storage.ImageStore
+)
+
+func Start(cfg config.AppConfigs) {
+
+	// initialize the image store
+	ImageStore = storage.GetNewImageStore(cfg)
+
+	// initialize injector client
+	injectorClient := &controller.InjectorClient{
+		ContainerResults: []types.ContainerRuntime{},
+	}
+
+	// populate injectorClient
+	ScanExistingPods(injectorClient)
+
+	// watch pods as they come up for any new image data
+	AddWatcherToPods(injectorClient)
+}
+
 func ScanExistingPods(injectorClient *controller.InjectorClient) {
-	containerResults := GetContainerResultsForAllPods(false)
-	injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResults...)
-	injectorClient.SyncDataWithInjector()
+
+	// 1. Pull data from ImageStore
+	containerRuntimeMap := ImageStore.GetAllContainerRuntimes()
+
+	// 2. Scan all pods for image data
+	containerResultsFromPods := GetContainerResultsForAllPods(false)
+
+	// 3. Find the diff between the data in redis and the data from pods
+	diffMapContainerRuntime := []models.ContainerRuntime{}
+	for _, value := range containerResultsFromPods {
+
+		pushNewValue := false
+
+		// get object from image store
+		imgStoreContainerRuntime, ok := containerRuntimeMap[value.Image]
+		if ok {
+			// if present, compare if the values are different
+			pushNewValue = !imgStoreContainerRuntime.Equals(value)
+		} else {
+			// not found, push the value
+			pushNewValue = true
+		}
+
+		// if the value is different push in the `diffMapContainerRuntime`
+		if pushNewValue {
+			diffMapContainerRuntime = append(diffMapContainerRuntime, value)
+		}
+	}
+
+	// 4. Add new data to ImageStore
+	err := ImageStore.SetContainerRuntimes(diffMapContainerRuntime)
+	if err != nil {
+		return
+	}
+	//injectorClient.ContainerResults = append(injectorClient.ContainerResults, containerResultsFromPods...)
+	//injectorClient.SyncDataWithInjector()
 }
 
 func AddWatcherToPods(injectorClient *controller.InjectorClient) {

@@ -2,10 +2,10 @@ package controller
 
 import (
 	"bytes"
-	types "deamonset/internal/models"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	types "zerok-deamonset/internal/models"
 )
 
 var injectorendpoint = "http://zerok-injector.zerok-injector.svc.cluster.local:8444/sync-runtime"

@@ -1,7 +1,7 @@
 package inspectors
 
 import (
-	types "deamonset/internal/models"
+	types "zerok-deamonset/internal/models"
 )
 
 type inspector interface {
