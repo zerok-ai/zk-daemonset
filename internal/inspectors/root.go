@@ -10,9 +10,9 @@ type inspector interface {
 
 var inspectorsList = []inspector{java, nodeJs, python}
 
-func DetectLanguage(processes []types.ProcessDetails) []types.ProcessDetails {
+func DetectLanguageOfAllProcesses(processes []types.ProcessDetails) []string {
 	processName := ""
-	results := []types.ProcessDetails{}
+	results := []string{}
 	for _, p := range processes {
 		p.ProcessName = processName
 		p.Runtime = types.UnknownLanguage
@@ -24,11 +24,10 @@ func DetectLanguage(processes []types.ProcessDetails) []types.ProcessDetails {
 				}
 				p.ProcessName = processName
 				p.Runtime = inspectionResult
-
 				break
 			}
 		}
-		results = append(results, p)
+		results = append(results, string(p.Runtime))
 	}
 	return results
 }

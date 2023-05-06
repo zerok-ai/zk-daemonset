@@ -4,7 +4,7 @@ REPOSITORY ?= stage
 LOCATION ?= us-west1
 IMAGE_PREFIX = $(LOCATION)-docker.pkg.dev/$(PROJECT_ID)/$(REPOSITORY)
 IMAGE_NAME = zerok-deamonset
-IMAGE_VERSION = test
+IMAGE_VERSION = 1.0
 
 export GO111MODULE=on
 

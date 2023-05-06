@@ -26,7 +26,7 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 	_redisClient := redis.NewClient(&redis.Options{
 		Addr:        fmt.Sprint(redisConfig.Host, ":", redisConfig.Port),
 		Password:    "",
-		DB:          0,
+		DB:          7,
 		ReadTimeout: readTimeout,
 	})
 
@@ -36,6 +36,11 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 		redisClient:   _redisClient,
 		hashTableName: hashTableName,
 	}
+
+	//if _redisClient.Del(hashTableName).Err() != nil {
+	//	fmt.Println("couldn't delete hashtable " + hashTableName)
+	//}
+
 	return imgRedis
 }
 
@@ -52,7 +57,7 @@ func (zkRedis ImageStore) SetContainerRuntime(key string, value models.Container
 
 func (zkRedis ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.ContainerRuntime) error {
 
-	var valuesToSet map[string]interface{}
+	valuesToSet := map[string]interface{}{}
 
 	for _, value := range containerRuntimeObjects {
 		// serialize the ContainerRuntime struct to JSON
@@ -84,8 +89,8 @@ func (zkRedis ImageStore) GetContainerRuntime(key string) (*models.ContainerRunt
 	return &containerRuntime, nil
 }
 
-func (zkRedis ImageStore) GetAllContainerRuntimes() map[string]models.ContainerRuntime {
-	mapContainerRuntime := map[string]models.ContainerRuntime{}
+func (zkRedis ImageStore) GetAllContainerRuntimes() map[string]*models.ContainerRuntime {
+	mapContainerRuntime := map[string]*models.ContainerRuntime{}
 
 	output := zkRedis.redisClient.HGetAll(zkRedis.hashTableName)
 	err := output.Err()
@@ -101,8 +106,7 @@ func (zkRedis ImageStore) GetAllContainerRuntimes() map[string]models.ContainerR
 			fmt.Printf("Unable to unmarshal value for key `%s`. Error: %v", key, err)
 			continue
 		}
-
-		mapContainerRuntime[key] = containerRuntime
+		mapContainerRuntime[key] = &containerRuntime
 	}
 
 	return mapContainerRuntime

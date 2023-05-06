@@ -41,7 +41,6 @@ func LabelPod(pod *corev1.Pod, path string, value string) {
 func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
 	clientSet := GetK8sClientSet()
 	node := GetCurrentNodeName()
-	fmt.Println(node)
 	var pods *corev1.PodList
 	if allPods {
 		pods, _ = clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{

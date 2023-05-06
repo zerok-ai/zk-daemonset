@@ -10,28 +10,21 @@ type ProcessDetails struct {
 
 type ProgrammingLanguage string
 
-type ContainerRuntime struct {
-	PodUID        string           `json:"uid"`
-	ContainerName string           `json:"cont"`
-	Image         string           `json:"image"`
-	ImageID       string           `json:"imageId"`
-	Process       []ProcessDetails `json:"process"`
-}
-
 //type ContainerRuntime struct {
-//	Image    string `json:"image"`
-//	ImageID  string `json:"imageId"`
-//	Language string `json:"language"`
+//	PodUID        string           `json:"uid"`
+//	ContainerName string           `json:"cont"`
+//	Image         string           `json:"image"`
+//	ImageID       string           `json:"imageId"`
+//	Process       []ProcessDetails `json:"process"`
 //}
 
-func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
-	if cr.PodUID != newContainerRuntime.PodUID {
-		return false
-	}
+type ContainerRuntime struct {
+	Image    string   `json:"image"`
+	ImageID  string   `json:"imageId"`
+	Language []string `json:"language"`
+}
 
-	if cr.ContainerName != newContainerRuntime.ContainerName {
-		return false
-	}
+func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
 
 	if cr.Image != newContainerRuntime.Image {
 		return false
@@ -39,6 +32,12 @@ func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
 
 	if cr.ImageID != newContainerRuntime.ImageID {
 		return false
+	}
+
+	for index, _ := range cr.Language {
+		if cr.Language[index] != newContainerRuntime.Language[index] {
+			return false
+		}
 	}
 
 	return true
