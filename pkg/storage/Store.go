@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	defaultExpiry time.Duration = time.Hour * 24 * 30
-	hashTableName string        = "container_images"
+	defaultExpiry    time.Duration = time.Hour * 24 * 30
+	hashTableName    string        = "zk_img_proc_map"
+	hashTableVersion string        = "zk_img_proc_version"
 )
 
 type ImageStore struct {
@@ -52,13 +53,19 @@ func (zkRedis ImageStore) SetContainerRuntime(key string, value models.Container
 		return err
 	}
 
-	return zkRedis.redisClient.HSet(zkRedis.hashTableName, key, string(serialized)).Err()
+	// set the new value
+	if err := zkRedis.redisClient.HSet(zkRedis.hashTableName, key, string(serialized)).Err(); err != nil {
+		return err
+	}
+
+	// increment the store version
+	return zkRedis.incrementStoreVersion()
 }
 
 func (zkRedis ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.ContainerRuntime) error {
 
+	// serialize the ContainerRuntime struct to JSON
 	valuesToSet := map[string]interface{}{}
-
 	for _, value := range containerRuntimeObjects {
 		// serialize the ContainerRuntime struct to JSON
 		serialized, err := json.Marshal(value)
@@ -68,7 +75,13 @@ func (zkRedis ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.
 		valuesToSet[value.Image] = serialized
 	}
 
-	return zkRedis.redisClient.HMSet(zkRedis.hashTableName, valuesToSet).Err()
+	// set the new value
+	if err := zkRedis.redisClient.HMSet(zkRedis.hashTableName, valuesToSet).Err(); err != nil {
+		return err
+	}
+
+	// increment the store version
+	return zkRedis.incrementStoreVersion()
 }
 
 func (zkRedis ImageStore) GetContainerRuntime(key string) (*models.ContainerRuntime, error) {
@@ -102,6 +115,7 @@ func (zkRedis ImageStore) GetAllContainerRuntimes() map[string]*models.Container
 	// deserialize the value against each key into `models.ContainerRuntime`
 	for key, value := range mapOfContainerRuntimeStrings {
 		var containerRuntime models.ContainerRuntime
+
 		if err := json.Unmarshal([]byte(value), &containerRuntime); err != nil {
 			fmt.Printf("Unable to unmarshal value for key `%s`. Error: %v", key, err)
 			continue
@@ -119,4 +133,12 @@ func (zkRedis ImageStore) Delete(key string) error {
 func (zkRedis ImageStore) Length() (int64, error) {
 	// get the number of hash key-value pairs
 	return zkRedis.redisClient.HLen(zkRedis.hashTableName).Result()
+}
+
+func (zkRedis ImageStore) GetStoreVersion() (int64, error) {
+	return zkRedis.redisClient.Get(hashTableVersion).Int64()
+}
+
+func (zkRedis ImageStore) incrementStoreVersion() error {
+	return zkRedis.redisClient.IncrBy(hashTableVersion, 1).Err()
 }

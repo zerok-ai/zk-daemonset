@@ -24,7 +24,7 @@ var (
 	ImageStore *storage.ImageStore
 )
 
-func Start(cfg config.AppConfigs) {
+func Start(cfg config.AppConfigs) error {
 
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
@@ -39,6 +39,8 @@ func Start(cfg config.AppConfigs) {
 
 	// watch pods as they come up for any new image data
 	AddWatcherToPods(injectorClient)
+
+	return nil
 }
 
 func ScanExistingPods(injectorClient *controller.InjectorClient) {

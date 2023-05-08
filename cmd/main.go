@@ -16,5 +16,7 @@ func main() {
 	}
 
 	// start business logic
-	detector.Start(cfg)
+	if err := detector.Start(cfg); err != nil {
+		panic(err)
+	}
 }
