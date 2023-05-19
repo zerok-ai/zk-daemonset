@@ -5,37 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dd0ede53-18b2-497c-8817-df060968efa5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/zk-daemonset.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/storage/imageStore.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/gcp/image-patch.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/gcp/kustomization.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/minikube/daemonset.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/minikube/kustomization.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/minikube/namespace.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/k8s/minikube/rbac.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/zk-deamonset.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/zk-deamonset.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/config/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/detector/detect.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/detector/detect.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/inspectors/java.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/inspectors/java.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/inspectors/node.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/inspectors/node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/inspectors/python.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/inspectors/python.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/inspectors/root.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/inspectors/languageInspector.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/k8utils/k8sutils.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/k8utils/k8sutils.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/models/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/const.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/models/types.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/models/types.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/process/process.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/process/process.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/k8s.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/storage/Store.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/zkclient/controller/injectorclient.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/process/process.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/detector/processes.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k8s/minikube/daemonset.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/minikube/daemonset.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,23 +39,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "develop",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/Users/muditmathur/workspace/zerokdotcom/zk-daemonset",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "settings.editor.selected.configurable": "preferences.general"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/muditmathur/workspace/zerokdotcom/zk-daemonset&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.general&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="GoMoveDeclarationDialog.RECENT_KEY">
       <recent name="$PROJECT_DIR$/internal/models" />
@@ -93,11 +69,11 @@
       <recent name="$PROJECT_DIR$/pkg" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/internal/detector" />
+      <recent name="$PROJECT_DIR$/config" />
       <recent name="$PROJECT_DIR$/k8s/base" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/internal" />
-      <recent name="$PROJECT_DIR$/k8s" />
-      <recent name="$PROJECT_DIR$/cmd" />
     </key>
   </component>
   <component name="RunManager">
@@ -159,16 +135,5 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/internal/process/process.go</url>
-          <line>2</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

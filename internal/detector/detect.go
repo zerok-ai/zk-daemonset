@@ -13,7 +13,6 @@ import (
 	"zk-daemonset/internal/inspectors"
 	"zk-daemonset/internal/k8utils"
 	"zk-daemonset/internal/models"
-	"zk-daemonset/internal/process"
 	"zk-daemonset/internal/storage"
 )
 
@@ -137,7 +136,7 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 	containerResults := []models.ContainerRuntime{}
 	for _, container := range targetContainers {
 
-		processes, err := process.FindProcessInContainer(targetPodUID, container.Name)
+		processes, err := FindProcessInContainer(targetPodUID, container.Name)
 		if err != nil {
 			fmt.Println("caught error while getting processes ", processes)
 			continue
