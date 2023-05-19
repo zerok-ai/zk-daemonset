@@ -1,0 +1,7 @@
+resources:
+  - namespace.yaml
+  - daemonset.yaml
+  - rbac.yaml
+namespace: zk-client
+commonLabels:
+  app: zk-daemonset

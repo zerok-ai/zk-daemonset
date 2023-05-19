@@ -2,7 +2,7 @@ package inspectors
 
 import (
 	"strings"
-	types "zerok-deamonset/internal/models"
+	types "zk-daemonset/internal/models"
 )
 
 type nodejsInspector struct{}

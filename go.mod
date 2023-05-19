@@ -1,4 +1,4 @@
-module zerok-deamonset
+module zk-daemonset
 
 go 1.19
 

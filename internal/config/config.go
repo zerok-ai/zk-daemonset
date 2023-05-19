@@ -10,6 +10,7 @@ import (
 type RedisConfig struct {
 	Host        string `yaml:"host" env:"REDIS_HOST" env-description:"Database host"`
 	Port        string `yaml:"port" env:"REDIS_PORT" env-description:"Database port"`
+	DB          int    `yaml:"db" env:"REDIS_DB" env-description:"Database to load"`
 	ReadTimeout int    `yaml:"readTimeout"`
 }
 

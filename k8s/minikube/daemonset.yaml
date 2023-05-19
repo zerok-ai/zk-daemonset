@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zk-daemonset
+  namespace: zk-client
+  labels:
+    app: zk-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: zk-daemonset
+  template:
+    metadata:
+      name: zk-daemonset
+      labels:
+        app: zk-daemonset
+    spec:
+      serviceAccountName: zk-daemonset
+      volumes:
+        - name: daemonset-config
+          configMap:
+            name: zk-daemonset-configmap
+      containers:
+        - name: zk-daemonset
+          image: zk-daemonset:1.0
+          imagePullPolicy: Never
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi
+          securityContext:
+            capabilities:
+              add:
+              - SYS_PTRACE
+          volumeMounts:
+            - name: daemonset-config
+              mountPath: /zk-daemonset
+      hostPID: true
+---
+
+apiVersion: v1
+data:
+  config.yaml: |+
+    redis:
+      host: redis.redis.svc.cluster.local
+      port: 6379
+      readTimeout: 20
+      db: 7
+kind: ConfigMap
+metadata:
+  name: zk-daemonset-configmap

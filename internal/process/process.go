@@ -8,7 +8,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	types "zerok-deamonset/internal/models"
+	types "zk-daemonset/internal/models"
 
 	"github.com/fntlnz/mountinfo"
 )

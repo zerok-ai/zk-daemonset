@@ -2,11 +2,9 @@ package k8utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
-	"zerok-deamonset/internal/models"
-
-	"encoding/json"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,8 +19,12 @@ type patchStringValue struct {
 	Value string `json:"value"`
 }
 
-func LabelPod(pod *corev1.Pod, path string, value string) {
-	k8sClient := GetK8sClientSet().CoreV1()
+func LabelPod(pod *corev1.Pod, path string, value string) error {
+	k8sClientSet, err := GetK8sClientSet()
+	if err != nil {
+		return err
+	}
+	k8sClient := k8sClientSet.CoreV1()
 	payload := []patchStringValue{{
 		Op:    "replace",
 		Path:  path,
@@ -36,39 +38,37 @@ func LabelPod(pod *corev1.Pod, path string, value string) {
 	} else {
 		fmt.Println(updateErr)
 	}
+	return nil
 }
 
-func GetPodsInCurrentNode(allPods bool) *corev1.PodList {
-	clientSet := GetK8sClientSet()
-	node := GetCurrentNodeName()
-	var pods *corev1.PodList
-	if allPods {
-		pods, _ = clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
-			FieldSelector: "spec.nodeName=" + node,
-		})
-	} else {
-		pods, _ = clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
-			FieldSelector: "spec.nodeName=" + node,
-			LabelSelector: models.ZkOrchStatusKey + "!=" + models.ZkOrchScanned,
-		})
+func GetPodsInCurrentNode() (*corev1.PodList, error) {
+	clientSet, err := GetK8sClientSet()
+	if err != nil {
+		return nil, err
 	}
-	return pods
+	node := GetCurrentNodeName()
+
+	pods, _ := clientSet.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{
+		FieldSelector: "spec.nodeName=" + node,
+	})
+
+	return pods, nil
 }
 
 func GetCurrentNodeName() string {
 	return os.Getenv("MY_NODE_NAME")
 }
 
-func GetK8sClientSet() *kubernetes.Clientset {
+func GetK8sClientSet() (*kubernetes.Clientset, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return clientset
+	return kubernetes.NewForConfig(config)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//return clientset, nil
 }

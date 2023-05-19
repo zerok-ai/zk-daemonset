@@ -1,5 +1,17 @@
 package models
 
+import "fmt"
+
+type Set map[string]bool
+
+func (s Set) Add(item string) {
+	s[item] = true
+}
+
+func (s Set) Contains(item string) bool {
+	return s[item]
+}
+
 type ProcessDetails struct {
 	ProcessID   int                 `json:"pid"`
 	ExeName     string              `json:"exe"`
@@ -34,13 +46,35 @@ func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
 		return false
 	}
 
+	if len(cr.Language) != len(newContainerRuntime.Language) {
+		return false
+	}
+
+	// collect all the elements for `cr` in a set and the languages may not be in order
+	langSet := make(Set)
+	for _, lang := range cr.Language {
+		langSet.Add(lang)
+	}
+
+	// check if all the elements of the new array are present in the old array
 	for index, _ := range cr.Language {
-		if cr.Language[index] != newContainerRuntime.Language[index] {
+		if !langSet.Contains(newContainerRuntime.Language[index]) {
 			return false
 		}
 	}
 
 	return true
+}
+
+func (cr ContainerRuntime) String() string {
+
+	stCr := fmt.Sprintf("%s:[", cr.Image)
+	for _, lang := range cr.Language {
+		stCr += lang + ", "
+	}
+	stCr += "]"
+
+	return stCr
 }
 
 //type ContainerRuntime struct {

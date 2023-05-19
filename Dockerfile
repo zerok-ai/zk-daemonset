@@ -1,15 +1,6 @@
-FROM --platform=linux/amd64 golang:1.19.1-alpine3.16 AS build 
-ENV GO111MODULE on
-ENV CGO_ENABLED 0
+FROM golang:1.18-alpine
+WORKDIR /zk
+COPY zk-daemonset .
+COPY config.yaml .
+CMD ["/zk/zk-daemonset", "-c", "/zk/config.yaml"]
 
-RUN apk add make
-
-WORKDIR /go/src/zerok-deamonset
-ADD . .
-RUN make build
-
-FROM alpine:3.17
-WORKDIR /zerok-deamonset
-COPY --from=build /go/src/zerok-deamonset/zerok-deamonset .
-COPY internal/config/config.yaml /zerok-deamonset/
-CMD ["/zerok-deamonset/zerok-deamonset", "-c", "/zerok-deamonset/config.yaml"]

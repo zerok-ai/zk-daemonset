@@ -9,15 +9,12 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"time"
-	"zerok-deamonset/internal/config"
-	"zerok-deamonset/internal/inspectors"
-	"zerok-deamonset/internal/k8utils"
-	"zerok-deamonset/internal/models"
-	"zerok-deamonset/internal/process"
-	"zerok-deamonset/pkg/storage"
-	"zerok-deamonset/pkg/zkclient/controller"
-
-	types "zerok-deamonset/internal/models"
+	"zk-daemonset/internal/config"
+	"zk-daemonset/internal/inspectors"
+	"zk-daemonset/internal/k8utils"
+	"zk-daemonset/internal/models"
+	"zk-daemonset/internal/process"
+	"zk-daemonset/internal/storage"
 )
 
 var (
@@ -29,39 +26,34 @@ func Start(cfg config.AppConfigs) error {
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
 
-	// initialize injector client
-	injectorClient := &controller.InjectorClient{
-		ContainerResults: []types.ContainerRuntime{},
-	}
-
-	// populate injectorClient
-	ScanExistingPods(injectorClient)
+	// scan existing pods for runtimes
+	_ = ScanExistingPods()
 
 	// watch pods as they come up for any new image data
-	AddWatcherToPods(injectorClient)
-
-	return nil
+	return AddWatcherToPods()
 }
 
-func ScanExistingPods(injectorClient *controller.InjectorClient) {
+func ScanExistingPods() error {
 
-	fmt.Println("scanning existing pods")
+	// Scan all pods for image data
+	containerResultsFromPods, err := GetContainerResultsForAllPods()
 
-	// 1. Pull data from ImageStore
-	containerRuntimeMap := ImageStore.GetAllContainerRuntimes()
-
-	// 2. Scan all pods for image data
-	containerResultsFromPods := GetContainerResultsForAllPods(false)
-
-	// 3. find diff and sync
-	findDiffAndSync(containerRuntimeMap, containerResultsFromPods)
+	if err == nil {
+		// update the new results
+		err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
+	}
+	return err
 }
 
-func AddWatcherToPods(injectorClient *controller.InjectorClient) {
+func AddWatcherToPods() error {
 
-	clientSet := k8utils.GetK8sClientSet()
+	clientSet, err := k8utils.GetK8sClientSet()
 
-	// create a context and a workqueue
+	if err != nil {
+		return err
+	}
+
+	// create a context and a work queue
 	ctx := context.Background()
 	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
@@ -72,7 +64,7 @@ func AddWatcherToPods(injectorClient *controller.InjectorClient) {
 	for {
 		item, shutdown := queue.Get()
 		if shutdown {
-			return
+			return nil
 		}
 
 		handlePodEvent(item.(*v1.Pod))
@@ -83,60 +75,11 @@ func AddWatcherToPods(injectorClient *controller.InjectorClient) {
 // handlePodEvent handles pod events
 func handlePodEvent(pod *v1.Pod) {
 
-	//fmt.Printf("handling Pod event for %s/%s on node %s\n", pod.Namespace, pod.Name, pod.Spec.NodeName)
-
-	// 1. find language for each container
+	// 1. find language for each container from the Pod
 	containerResults := GetAllContainerRuntimes(pod)
 
-	// 2. get existing value for containerruntime in Imagestore
-	existingContainerRuntimeMap := map[string]*models.ContainerRuntime{}
-	for _, containerResult := range containerResults {
-
-		existingContainRuntime, err := ImageStore.GetContainerRuntime(containerResult.Image)
-		if err != nil {
-			continue
-		}
-
-		existingContainerRuntimeMap[containerResult.Image] = existingContainRuntime
-	}
-
-	// 3. find diff and sync
-	findDiffAndSync(existingContainerRuntimeMap, containerResults)
-}
-
-func findDiffAndSync(existingContainerRuntimeMap map[string]*models.ContainerRuntime, containerResultsFromPods []models.ContainerRuntime) {
-
-	// 1. Find the diff between the data in redis and the data from pods
-	diffMapContainerRuntime := []models.ContainerRuntime{}
-	for _, containerRuntime := range containerResultsFromPods {
-
-		pushNewValue := false
-
-		// get object from image store
-		imgStoreContainerRuntime, ok := existingContainerRuntimeMap[containerRuntime.Image]
-		if ok {
-			// if present, compare if the values are different
-			pushNewValue = !imgStoreContainerRuntime.Equals(containerRuntime)
-		} else {
-			// not found, push the containerRuntime
-			pushNewValue = true
-		}
-
-		// if the containerRuntime is different push in the `diffMapContainerRuntime`
-		if pushNewValue {
-			diffMapContainerRuntime = append(diffMapContainerRuntime, containerRuntime)
-
-			fmt.Printf("new containerRuntime = %v\n", containerRuntime)
-		} else {
-			fmt.Printf("containerRuntime value already exists for = %s\n", containerRuntime.Image)
-		}
-	}
-
-	// 2. Add new data to ImageStore
-	err := ImageStore.SetContainerRuntimes(diffMapContainerRuntime)
-	if err != nil {
-		return
-	}
+	// 2. update the new results
+	_ = ImageStore.SetContainerRuntimes(containerResults)
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
@@ -168,14 +111,21 @@ func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workq
 	go _controller.Run(ctx.Done())
 }
 
-func GetContainerResultsForAllPods(allPods bool) []models.ContainerRuntime {
-	podList := k8utils.GetPodsInCurrentNode(allPods)
+func GetContainerResultsForAllPods() ([]models.ContainerRuntime, error) {
+
+	podList, err := k8utils.GetPodsInCurrentNode()
+	if err != nil {
+		return nil, err
+	}
 	containerResults := []models.ContainerRuntime{}
+
+	fmt.Printf("Found %d pods on the node\n", len(podList.Items))
+
 	for _, pod := range podList.Items {
 		temp := GetAllContainerRuntimes(&pod)
 		containerResults = append(containerResults, temp...)
 	}
-	return containerResults
+	return containerResults, nil
 }
 
 func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
@@ -184,7 +134,7 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 	targetContainers := pod.Status.ContainerStatuses
 
 	// iterate through the containers
-	var containerResults []models.ContainerRuntime
+	containerResults := []models.ContainerRuntime{}
 	for _, container := range targetContainers {
 
 		processes, err := process.FindProcessInContainer(targetPodUID, container.Name)
@@ -194,11 +144,13 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 		}
 		languages := inspectors.DetectLanguageOfAllProcesses(processes)
 
-		containerResults = append(containerResults, models.ContainerRuntime{
-			Image:    container.Image,
-			ImageID:  container.ImageID,
-			Language: languages,
-		})
+		if len(languages) > 0 {
+			containerResults = append(containerResults, models.ContainerRuntime{
+				Image:    container.Image,
+				ImageID:  container.ImageID,
+				Language: languages,
+			})
+		}
 
 	}
 	return containerResults

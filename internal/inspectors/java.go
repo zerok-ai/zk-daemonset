@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	types "zerok-deamonset/internal/models"
+	types "zk-daemonset/internal/models"
 )
 
 type javaInspector struct{}
