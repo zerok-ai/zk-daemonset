@@ -14,6 +14,7 @@ type RedisConfig struct {
 	ReadTimeout int    `yaml:"readTimeout"`
 }
 
+// AppConfigs is an application configuration structure
 type AppConfigs struct {
 	Redis RedisConfig `yaml:"redis"`
 }
@@ -24,7 +25,7 @@ type Args struct {
 }
 
 // ProcessArgs processes and handles CLI arguments
-func ProcessArgs(cfg interface{}) Args {
+func ProcessArgs(cfg interface{}) error {
 	var a Args
 
 	flagSet := flag.NewFlagSet("server", 1)
@@ -45,7 +46,8 @@ func ProcessArgs(cfg interface{}) Args {
 	}
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		return Args{}
+		return err
 	}
-	return a
+
+	return cleanenv.ReadConfig(a.ConfigPath, &cfg)
 }

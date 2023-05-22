@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/ilyakaznacheev/cleanenv"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/detector"
 )
@@ -13,8 +12,7 @@ func main() {
 
 	// read configuration from the file and environment variables
 	var cfg config.AppConfigs
-	args := config.ProcessArgs(&cfg)
-	if err := cleanenv.ReadConfig(args.ConfigPath, &cfg); err != nil {
+	if err := config.ProcessArgs(&cfg); err != nil {
 		panic(err)
 	}
 
