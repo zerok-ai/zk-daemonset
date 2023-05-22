@@ -1,5 +1,5 @@
 redis:
   host: redis.zk-client.svc.cluster.local
   port: 6379
-  db: 6
+  db: 7
   readTimeout: 20
