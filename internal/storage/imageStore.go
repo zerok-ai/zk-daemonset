@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	redis "github.com/redis/go-redis/v9"
+	"log"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/models"
