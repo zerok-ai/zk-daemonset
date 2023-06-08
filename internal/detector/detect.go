@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	"log"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/inspectors"
@@ -26,7 +27,11 @@ func Start(cfg config.AppConfigs) error {
 	ImageStore = storage.GetNewImageStore(cfg)
 
 	// scan existing pods for runtimes
-	_ = ScanExistingPods()
+	err := ScanExistingPods()
+	if err != nil {
+		log.Default().Printf("error in ScanExistingPods %v\n", err)
+		return err
+	}
 
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
@@ -36,10 +41,14 @@ func ScanExistingPods() error {
 
 	// Scan all pods for image data
 	containerResultsFromPods, err := GetContainerResultsForAllPods()
+	if err != nil {
+		return err
+	}
 
-	if err == nil {
-		// update the new results
-		err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
+	// update the new results
+	err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
+	if err != nil {
+		return err
 	}
 	return err
 }
@@ -74,11 +83,17 @@ func AddWatcherToPods() error {
 // handlePodEvent handles pod events
 func handlePodEvent(pod *v1.Pod) {
 
+	fmt.Printf("\n\nhandlePodEvent: for pod %s\n", pod.Name)
+
 	// 1. find language for each container from the Pod
 	containerResults := GetAllContainerRuntimes(pod)
 
 	// 2. update the new results
-	_ = ImageStore.SetContainerRuntimes(containerResults)
+	err := ImageStore.SetContainerRuntimes(containerResults)
+	if err != nil {
+		log.Default().Printf("error %v\n", err)
+		return
+	}
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
@@ -138,7 +153,7 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 
 		processes, err := FindProcessInContainer(targetPodUID, container.Name)
 		if err != nil {
-			fmt.Println("caught error while getting processes ", processes)
+			fmt.Println("error while getting processes of a container ", processes)
 			continue
 		}
 		languages := inspectors.DetectLanguageOfAllProcesses(processes)

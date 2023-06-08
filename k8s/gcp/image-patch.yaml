@@ -7,5 +7,5 @@ spec:
     spec:
       containers:
         - name: zk-daemonset
-          image: us-west1-docker.pkg.dev/zerok-dev/zk-client/zk-daemonset:1.0.1
+          image: us-west1-docker.pkg.dev/zerok-dev/zk-client/zk-daemonset:1.0.2
           imagePullPolicy: Always

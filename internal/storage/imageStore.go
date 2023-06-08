@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis"
-	"log"
+	redis "github.com/redis/go-redis/v9"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/models"
@@ -14,6 +14,10 @@ const (
 	defaultExpiry  time.Duration = time.Hour * 24 * 30
 	_hashSetName   string        = "zk_img_proc_map"
 	hashSetVersion string        = "zk_img_proc_version"
+)
+
+var (
+	ctx = context.Background()
 )
 
 type ImageStore struct {
@@ -47,10 +51,6 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 	return imgRedis
 }
 
-func (imageStore ImageStore) SetContainerRuntime(value models.ContainerRuntime) error {
-	return imageStore.SetContainerRuntimes([]models.ContainerRuntime{value})
-}
-
 func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.ContainerRuntime) error {
 
 	containerRuntimeObjects = imageStore.getOnlyWriteEligibleRuntimeObjects(containerRuntimeObjects)
@@ -67,11 +67,11 @@ func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []mode
 		if err != nil {
 			return err
 		}
-		valuesToSet[value.Image] = serialized
+		valuesToSet[value.Image] = string(serialized)
 	}
 
 	// set the new value
-	if err := imageStore.redisClient.HMSet(imageStore.hashSetName, valuesToSet).Err(); err != nil {
+	if err := imageStore.redisClient.HMSet(ctx, imageStore.hashSetName, valuesToSet).Err(); err != nil {
 		return err
 	}
 
@@ -82,7 +82,7 @@ func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []mode
 func (imageStore ImageStore) GetContainerRuntime(key string) (*models.ContainerRuntime, error) {
 
 	// get the value against the key in hashset
-	output := imageStore.redisClient.HGet(imageStore.hashSetName, key)
+	output := imageStore.redisClient.HGet(ctx, imageStore.hashSetName, key)
 	if err := output.Err(); err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (imageStore ImageStore) GetContainerRuntime(key string) (*models.ContainerR
 }
 
 func (imageStore ImageStore) GetContainerRuntimes(keys []string) map[string]*models.ContainerRuntime {
-	valuesFromRedis, err := imageStore.redisClient.HMGet(imageStore.hashSetName, keys...).Result()
+	valuesFromRedis, err := imageStore.redisClient.HMGet(ctx, imageStore.hashSetName, keys...).Result()
 	if err != nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (imageStore ImageStore) GetContainerRuntimes(keys []string) map[string]*mod
 }
 
 func (imageStore ImageStore) GetAllContainerRuntimes() map[string]*models.ContainerRuntime {
-	output := imageStore.redisClient.HGetAll(imageStore.hashSetName)
+	output := imageStore.redisClient.HGetAll(ctx, imageStore.hashSetName)
 	if output.Err() != nil {
 		return nil
 	}
@@ -120,20 +120,20 @@ func (imageStore ImageStore) GetAllContainerRuntimes() map[string]*models.Contai
 }
 
 func (imageStore ImageStore) Delete(key string) error {
-	return imageStore.redisClient.HDel(imageStore.hashSetName, key).Err()
+	return imageStore.redisClient.HDel(ctx, imageStore.hashSetName, key).Err()
 }
 
 func (imageStore ImageStore) Length() (int64, error) {
 	// get the number of hash key-value pairs
-	return imageStore.redisClient.HLen(imageStore.hashSetName).Result()
+	return imageStore.redisClient.HLen(ctx, imageStore.hashSetName).Result()
 }
 
 func (imageStore ImageStore) GetStoreVersion() (int64, error) {
-	return imageStore.redisClient.Get(hashSetVersion).Int64()
+	return imageStore.redisClient.Get(ctx, hashSetVersion).Int64()
 }
 
 func (imageStore ImageStore) incrementStoreVersion() error {
-	return imageStore.redisClient.IncrBy(hashSetVersion, 1).Err()
+	return imageStore.redisClient.IncrBy(ctx, hashSetVersion, 1).Err()
 }
 
 func (imageStore ImageStore) getOnlyWriteEligibleRuntimeObjects(containerResultsFromPods []models.ContainerRuntime) []models.ContainerRuntime {
