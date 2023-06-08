@@ -1,6 +1,6 @@
 NAME = zk-daemonset
 IMAGE_NAME = zk-daemonset
-IMAGE_VERSION = 1.0
+IMAGE_VERSION = 1.0.1
 
 LOCATION ?= us-west1
 PROJECT_ID ?= zerok-dev

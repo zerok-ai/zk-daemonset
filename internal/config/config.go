@@ -25,8 +25,10 @@ type Args struct {
 }
 
 // ProcessArgs processes and handles CLI arguments
-func ProcessArgs(cfg interface{}) error {
+func ProcessArgs() (*AppConfigs, error) {
 	var a Args
+
+	var cfg AppConfigs
 
 	flagSet := flag.NewFlagSet("server", 1)
 	flagSet.StringVar(&a.ConfigPath, "c", "config.yaml", "Path to configuration file")
@@ -46,8 +48,9 @@ func ProcessArgs(cfg interface{}) error {
 	}
 
 	if err := flagSet.Parse(os.Args[1:]); err != nil {
-		return err
+		return nil, err
 	}
 
-	return cleanenv.ReadConfig(a.ConfigPath, &cfg)
+	err := cleanenv.ReadConfig(a.ConfigPath, &cfg)
+	return &cfg, err
 }
