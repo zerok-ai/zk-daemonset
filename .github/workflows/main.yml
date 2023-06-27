@@ -1,6 +1,11 @@
 name: build and publish
 on:
   workflow_dispatch:
+     inputs:
+        ENV:
+            description: 'ENV'
+            required: true
+            default: 'poc'  
 env:
   ENV: ${{ github.event.inputs.ENV }}
   GOOS: ${{ vars.GOOS }}
