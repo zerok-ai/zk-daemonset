@@ -8,7 +8,7 @@ type inspector interface {
 	Inspect(process *types.ProcessDetails) (types.ProgrammingLanguage, bool)
 }
 
-var inspectorsList = []inspector{java, nodeJs, python}
+var inspectorsList = []inspector{java, nodeJs, python, golang}
 
 func DetectLanguageOfAllProcesses(processes []types.ProcessDetails) []string {
 	results := []string{}
