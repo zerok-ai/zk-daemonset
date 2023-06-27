@@ -10,6 +10,7 @@ env:
   ENV: ${{ github.event.inputs.ENV }}
   GOOS: ${{ vars.GOOS }}
   GOARCH: ${{ vars.GOARCH }}
+  GO111MODULE: ${{ vars.GO111MODULE }}
   CGO_ENABLED: ${{ vars.CGO_ENABLED }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY }}
   DOCKER_REG: ${{ vars.DOCKER_REG }}
@@ -32,7 +33,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.18'
-    
+      - name: go get 
+        run: go get -v ./...
       - name: Build
         run: go build -v -o zk-daemonset cmd/main.go
       
