@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/fntlnz/mountinfo v1.0.1
 	github.com/ilyakaznacheev/cleanenv v1.4.2
+	github.com/kataras/iris/v12 v12.2.0
 	github.com/redis/go-redis/v9 v9.0.5
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
@@ -44,7 +45,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kataras/blocks v0.0.7 // indirect
 	github.com/kataras/golog v0.1.8 // indirect
-	github.com/kataras/iris/v12 v12.2.0 // indirect
 	github.com/kataras/pio v0.0.11 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect

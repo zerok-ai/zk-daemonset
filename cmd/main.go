@@ -52,14 +52,16 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("config redis host:%s \n", cfg.Redis.Host)
+	fmt.Printf("config redis host:%s and server port: %d\n", cfg.Redis.Host, cfg.Server.Port)
+
+	app := newApp()
+	config := iris.WithLogLevel("error")
+	go app.Listen(":"+cfg.Server.Port, config)
+
+	fmt.Printf("Started iris application")
 
 	// start business logic
 	if err := detector.Start(*cfg); err != nil {
 		panic(err)
 	}
-
-	app := newApp()
-	config := iris.WithLogLevel("error")
-	app.Listen(":"+cfg.Server.Port, config)
 }

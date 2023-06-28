@@ -54,6 +54,9 @@ data:
       port: 6379
       readTimeout: 20
       db: 7
+    server:
+      host: localhost
+      port: 8080
 kind: ConfigMap
 metadata:
   name: zk-daemonset
