@@ -156,13 +156,14 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 			fmt.Println("error while getting processes of a container ", processes)
 			continue
 		}
-		languages := inspectors.DetectLanguageOfAllProcesses(processes)
+		languages, processName := inspectors.DetectLanguageOfAllProcesses(processes)
 
 		if len(languages) > 0 {
 			containerResults = append(containerResults, models.ContainerRuntime{
 				Image:    container.Image,
 				ImageID:  container.ImageID,
 				Language: languages,
+				Process:  processName,
 			})
 		}
 
