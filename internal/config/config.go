@@ -14,9 +14,15 @@ type RedisConfig struct {
 	ReadTimeout int    `yaml:"readTimeout"`
 }
 
+type ServerConfig struct {
+	Host string `yaml:"host" env:"SRV_HOST,HOST" env-description:"Server host" env-default:"localhost"`
+	Port string `yaml:"port" env:"SRV_PORT,PORT" env-description:"Server port" env-default:"8080"`
+}
+
 // AppConfigs is an application configuration structure
 type AppConfigs struct {
-	Redis RedisConfig `yaml:"redis"`
+	Redis  RedisConfig  `yaml:"redis"`
+	Server ServerConfig `yaml:"server"`
 }
 
 // Args command-line parameters

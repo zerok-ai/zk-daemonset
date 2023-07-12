@@ -3,3 +3,7 @@ redis:
   port: 6379
   db: 7
   readTimeout: 20
+
+server:
+  host: localhost
+  port: 8080

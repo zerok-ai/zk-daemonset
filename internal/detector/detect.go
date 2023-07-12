@@ -22,7 +22,6 @@ var (
 )
 
 func Start(cfg config.AppConfigs) error {
-
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
 
@@ -54,7 +53,6 @@ func ScanExistingPods() error {
 }
 
 func AddWatcherToPods() error {
-
 	clientSet, err := k8utils.GetK8sClientSet()
 
 	if err != nil {
