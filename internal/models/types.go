@@ -18,6 +18,7 @@ type ProcessDetails struct {
 	CmdLine     string              `json:"cmd"`
 	Runtime     ProgrammingLanguage `json:"runtime"`
 	ProcessName string              `json:"pname"`
+	EnvMap      map[string]string   `json:"env"`
 }
 
 type ProgrammingLanguage string
@@ -31,10 +32,12 @@ type ProgrammingLanguage string
 //}
 
 type ContainerRuntime struct {
-	Image    string   `json:"image"`
-	ImageID  string   `json:"imageId"`
-	Language []string `json:"language"`
-	Process  string   `json:"process,omitempty"`
+	Image    string            `json:"image"`
+	ImageID  string            `json:"imageId"`
+	Language []string          `json:"language"`
+	Process  string            `json:"process,omitempty"`
+	Cmd      []string          `json:"cmd,omitempty"`
+	EnvMap   map[string]string `json:"env"`
 }
 
 func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {
