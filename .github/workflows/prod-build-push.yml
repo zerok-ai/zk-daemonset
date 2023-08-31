@@ -23,13 +23,6 @@ jobs:
       GIT_TAG: ${{ github.ref }}
       DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
 
-  init2:
-    uses: zerok-ai/zk-git-actions/.github/workflows/zk-prod-init.yml@main
-    with:
-      ENVIRONMENT: ${{ github.event.inputs.ENV }}
-      GIT_TAG: ${{ github.ref }}
-      DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
-
   build-push:
     uses: zerok-ai/zk-git-actions/.github/workflows/zk-build-push.yml@main
     with:
