@@ -11,6 +11,17 @@ image:
   pullPolicy: Always
   tag: "latest"
 
+redis:
+  host: redis.zk-client.svc.cluster.local
+  port: 6379
+  readTimeout: 20
+  dbs:
+    traces: 1
+    otel: 3
+    scenarios: 6
+    imageStore: 7
+
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

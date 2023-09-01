@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/kataras/iris/v12"
+	zkConfig "github.com/zerok-ai/zk-utils-go/config"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/detector"
 )
@@ -47,8 +48,8 @@ func main() {
 	fmt.Printf("Hello from daemonset\n")
 
 	// read configuration from the file and environment variables
-	cfg, err := config.ProcessArgs()
-	if err != nil {
+	var cfg config.AppConfigs
+	if err := zkConfig.ProcessArgs[config.AppConfigs](&cfg); err != nil {
 		panic(err)
 	}
 
@@ -61,7 +62,7 @@ func main() {
 	fmt.Printf("Started iris application")
 
 	// start business logic
-	if err := detector.Start(*cfg); err != nil {
+	if err := detector.Start(cfg); err != nil {
 		panic(err)
 	}
 }

@@ -8,13 +8,13 @@ REPOSITORY ?= zk-client
 
 export GO111MODULE=on
 export GOARCH=amd64
+export GOPRIVATE=github.com/zerok-ai/zk-utils-go
 
 sync:
 	go get -v ./...
 
 build: sync
-	echo "GOARCH=${GOARCH}"
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o $(NAME) cmd/main.go
+	go build -v -o $(NAME) cmd/main.go
 
 docker-build: sync
 	CGO_ENABLED=0 GOOS=linux $(ARCH) go build -v -o $(NAME) cmd/main.go
@@ -31,6 +31,7 @@ docker-push-gke:
 docker-build-push-gke: docker-build-gke docker-push-gke
 
 # ------- CI-CD ------------
-ci-cd-build: build
+ci-cd-build: sync
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o $(NAME) cmd/main.go
 
 ci-cd-build-migration:

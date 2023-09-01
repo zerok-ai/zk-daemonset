@@ -4,15 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
+	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
 	"os"
 )
-
-type RedisConfig struct {
-	Host        string `yaml:"host" env:"REDIS_HOST" env-description:"Database host"`
-	Port        string `yaml:"port" env:"REDIS_PORT" env-description:"Database port"`
-	DB          int    `yaml:"db" env:"REDIS_DB" env-description:"Database to load"`
-	ReadTimeout int    `yaml:"readTimeout"`
-}
 
 type ServerConfig struct {
 	Host string `yaml:"host" env:"SRV_HOST,HOST" env-description:"Server host" env-default:"localhost"`
@@ -21,8 +15,8 @@ type ServerConfig struct {
 
 // AppConfigs is an application configuration structure
 type AppConfigs struct {
-	Redis  RedisConfig  `yaml:"redis"`
-	Server ServerConfig `yaml:"server"`
+	Redis  storage.RedisConfig `yaml:"redis"`
+	Server ServerConfig        `yaml:"server"`
 }
 
 // Args command-line parameters

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	redis "github.com/redis/go-redis/v9"
+	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
 	"log"
 	"time"
 	"zk-daemonset/internal/config"
@@ -28,27 +29,15 @@ type ImageStore struct {
 
 func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 
+	dbName := "imageStore"
 	redisConfig := appConfig.Redis
 	fmt.Printf("Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DB)
-	readTimeout := time.Duration(redisConfig.ReadTimeout) * time.Second
-	_redisClient := redis.NewClient(&redis.Options{
-		Addr:        fmt.Sprint(redisConfig.Host, ":", redisConfig.Port),
-		Password:    "",
-		DB:          redisConfig.DB,
-		ReadTimeout: readTimeout,
-	})
 
-	//_redisClient.Expire(hashSetName, defaultExpiry)
-
+	_redisClient := storage.GetRedisConnection(dbName, redisConfig)
 	imgRedis := &ImageStore{
 		redisClient: _redisClient,
 		hashSetName: _hashSetName,
 	}
-
-	//if _redisClient.Del(hashSetName).Err() != nil {
-	//	fmt.Println("couldn't delete hashtable " + hashSetName)
-	//}
-
 	return imgRedis
 }
 

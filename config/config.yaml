@@ -1,7 +1,11 @@
 redis:
-  host: redis.zk-client.svc.cluster.local
+  host: 127.0.0.1
   port: 6379
-  db: 7
+  dbs:
+    traces: 1
+    otel: 3
+    scenarios: 6
+    imageStore: 7
   readTimeout: 20
 
 server:

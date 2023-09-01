@@ -7,6 +7,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.4.2
 	github.com/kataras/iris/v12 v12.2.0
 	github.com/redis/go-redis/v9 v9.0.5
+	github.com/zerok-ai/zk-utils-go v0.4.10
 	k8s.io/api v0.27.1
 	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.27.1
