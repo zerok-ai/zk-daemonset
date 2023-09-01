@@ -21,6 +21,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: ZK_REDIS_PASSWORD # Setting Redis password from Secret
+          valueFrom:
+            secretKeyRef:
+              name: redis
+              key: redis-password
         image: "{{ index .Values.global.dockerBase}}/{{ index .Values.image.repo}}:{{ index .Values.image.tag}}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: zk-daemonset
