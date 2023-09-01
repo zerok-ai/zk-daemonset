@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd0ede53-18b2-497c-8817-df060968efa5" name="Changes" comment="">
+    <list default="true" id="dd0ede53-18b2-497c-8817-df060968efa5" name="Changes" comment="using zk-git-actions common actions for build and deployment">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/dev-build-push-deploy.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/dev-build-push.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/prod-build-push.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/main-old.yml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/detector/detect.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/detector/detect.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/minikube/daemonset.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/minikube/daemonset.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,13 +18,18 @@
   </component>
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="helmChart" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/go.mod" root0="SKIP_INSPECTION" />
   </component>
   <component name="KubernetesApiPersistence">
-    <option name="context" value="gke_zerok-dev_us-west1-b_rajeev01" />
+    <option name="context" value="gke_zerok-dev_us-west1-b_loadclient02" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -49,7 +53,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/avin/workspace/zerok/zk-daemonset&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/avin/workspace/zerok/zk-daemonset/.github/workflows&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;com.intellij.kubernetes.view.ui.settings.KubernetesViewConfigurable&quot;
@@ -61,11 +65,11 @@
       <recent name="$PROJECT_DIR$/internal/common" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.github/workflows" />
+      <recent name="$PROJECT_DIR$/helm-charts" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/k8s/overlay-gcp" />
       <recent name="$PROJECT_DIR$/k8s" />
-      <recent name="$PROJECT_DIR$/internal" />
-      <recent name="$PROJECT_DIR$/pkg" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/internal/detector" />
@@ -150,6 +154,11 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="changes to support helm in dev" />
+    <MESSAGE value="common init jobs" />
+    <option name="LAST_COMMIT_MESSAGE" value="common init jobs" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

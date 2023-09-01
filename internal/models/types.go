@@ -34,6 +34,7 @@ type ContainerRuntime struct {
 	Image    string   `json:"image"`
 	ImageID  string   `json:"imageId"`
 	Language []string `json:"language"`
+	Process  string   `json:"process,omitempty"`
 }
 
 func (cr ContainerRuntime) Equals(newContainerRuntime ContainerRuntime) bool {

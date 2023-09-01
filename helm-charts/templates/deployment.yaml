@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: zk-daemonset
+  name: zk-daemonset
+  namespace: zk-client
+spec:
+  selector:
+    matchLabels:
+      app: zk-daemonset
+  template:
+    metadata:
+      labels:
+        app: zk-daemonset
+      name: zk-daemonset
+    spec:
+      containers:
+      - env:
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        image: "{{ index .Values.global.dockerBase}}/{{ index .Values.image.repo}}:{{ index .Values.image.tag}}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name: zk-daemonset
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 250m
+            memory: 64Mi
+        securityContext:
+          capabilities:
+            add:
+            - SYS_PTRACE
+        volumeMounts:
+        - mountPath: /zk/config
+          name: daemonset-config
+      hostPID: true
+      serviceAccountName: zk-daemonset
+      volumes:
+      - configMap:
+          name: zk-daemonset
+        name: daemonset-config

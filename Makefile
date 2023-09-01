@@ -7,13 +7,14 @@ PROJECT_ID ?= zerok-dev
 REPOSITORY ?= zk-client
 
 export GO111MODULE=on
+export GOARCH=amd64
 
 sync:
 	go get -v ./...
 
 build: sync
 	echo "GOARCH=${GOARCH}"
-	go build -v -o $(NAME) cmd/main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o $(NAME) cmd/main.go
 
 docker-build: sync
 	CGO_ENABLED=0 GOOS=linux $(ARCH) go build -v -o $(NAME) cmd/main.go
@@ -28,3 +29,8 @@ docker-push-gke:
 	docker push $(IMAGE_PREFIX)$(IMAGE_NAME):$(IMAGE_VERSION)
 
 docker-build-push-gke: docker-build-gke docker-push-gke
+
+# ------- CI-CD ------------
+ci-cd-build: build
+
+ci-cd-build-migration:

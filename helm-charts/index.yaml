@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  zk-daemonset:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-07-21T11:28:26.283756+05:30"
+    description: A Helm chart for Kubernetes
+    digest: b3ecad067fa8a3cbbadaaaca6aaed05d73b2c44919548027254a1dd1ffcaa563
+    name: zk-daemonset
+    type: application
+    urls:
+    - zk-daemonset-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-07-21T11:28:26.28225+05:30"
