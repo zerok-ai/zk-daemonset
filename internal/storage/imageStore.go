@@ -31,7 +31,7 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 
 	dbName := "imageStore"
 	redisConfig := appConfig.Redis
-	fmt.Printf("Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DB)
+	fmt.Printf("Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DBs[dbName])
 
 	_redisClient := storage.GetRedisConnection(dbName, redisConfig)
 	imgRedis := &ImageStore{
