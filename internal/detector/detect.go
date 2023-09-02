@@ -156,12 +156,24 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 		}
 		languages, processName := inspectors.DetectLanguageOfAllProcesses(processes)
 
+		var cmdArray []string
+		envMap := make(map[string]string)
+
+		for _, process := range processes {
+			cmdArray = append(cmdArray, process.CmdLine)
+			for key, value := range process.EnvMap {
+				envMap[key] = value
+			}
+		}
+
 		if len(languages) > 0 {
 			containerResults = append(containerResults, models.ContainerRuntime{
 				Image:    container.Image,
 				ImageID:  container.ImageID,
 				Language: languages,
 				Process:  processName,
+				Cmd:      cmdArray,
+				EnvMap:   envMap,
 			})
 		}
 

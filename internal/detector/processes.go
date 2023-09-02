@@ -66,10 +66,13 @@ func FindProcessInContainer(podUID string, containerName string) ([]types.Proces
 						cmd = string(cmdLine)
 					}
 
+					envMap, err := parseProcEnviron(dname)
+
 					result = append(result, types.ProcessDetails{
 						ProcessID: pid,
 						ExeName:   exeName,
 						CmdLine:   cmd,
+						EnvMap:    envMap,
 					})
 				}
 			}
@@ -77,4 +80,27 @@ func FindProcessInContainer(podUID string, containerName string) ([]types.Proces
 	}
 
 	return result, nil
+}
+
+func parseProcEnviron(pid string) (map[string]string, error) {
+	envMap := make(map[string]string)
+
+	data, err := os.ReadFile(fmt.Sprintf("/proc/%s/environ", pid))
+	if err != nil {
+		return nil, err
+	}
+
+	envEntries := strings.Split(string(data), "\000")
+
+	for _, entry := range envEntries {
+		parts := strings.SplitN(entry, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			if strings.HasPrefix(key, "OTEL") || strings.HasPrefix(key, "JAVA") {
+				envMap[key] = parts[1]
+			}
+		}
+	}
+
+	return envMap, nil
 }
