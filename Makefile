@@ -16,6 +16,8 @@ sync:
 build: sync
 	go build -v -o $(NAME) cmd/main.go
 
+
+
 docker-build: sync
 	CGO_ENABLED=0 GOOS=linux $(ARCH) go build -v -o $(NAME) cmd/main.go
 	docker build --no-cache -t $(IMAGE_PREFIX)$(IMAGE_NAME):$(IMAGE_VERSION) .
@@ -31,7 +33,9 @@ docker-push-gke:
 docker-build-push-gke: docker-build-gke docker-push-gke
 
 # ------- CI-CD ------------
-ci-cd-build: sync
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -o $(NAME) cmd/main.go
+debug:
+	dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient cmd/main.go
+ci-cd-build: sync dubug
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "all=-N -l" -v -o $(NAME) cmd/main.go
 
 ci-cd-build-migration:
