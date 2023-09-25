@@ -25,22 +25,22 @@ type ProcessDetails struct {
 }
 
 type ContainerDetails struct {
-	Name                  string             `json:"container.name"`
-	Image                 string             `json:"container.image"`
-	ProcessExecutablePath []string           `json:"process.executable.path"`
+	Name                  string             `json:"container_name"`
+	Image                 string             `json:"container_image"`
+	ProcessExecutablePath []string           `json:"process.executable_path"`
 	ProcessCommandArgs    []string           `json:"process.command_args"`
 	Ports                 []v1.ContainerPort `json:"ports"`
 }
 
 type PodDetails struct {
 	Containers        []ContainerDetails `json:"containers"`
-	HostArch          string             `json:"host.arch"`
-	HostName          string             `json:"host.name"`
-	K8SDeploymentName string             `json:"k8s.deployment.name"`
-	K8SNamespaceName  string             `json:"k8s.namespace.name"`
-	K8SNodeName       string             `json:"k8s.node.name"`
-	K8SPodName        string             `json:"k8s.pod.name"`
-	ServiceName       string             `json:"service.name"`
+	HostArch          string             `json:"host_arch"`
+	HostName          string             `json:"host_name"`
+	K8SDeploymentName string             `json:"k8s_deployment_name"`
+	K8SNamespaceName  string             `json:"k8s_namespace_name"`
+	K8SNodeName       string             `json:"k8s_node_name"`
+	K8SPodName        string             `json:"k8s_pod_name"`
+	ServiceName       string             `json:"service_name"`
 	CreateTS          string             `json:"create_ts"`
 }
 
