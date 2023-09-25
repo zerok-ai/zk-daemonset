@@ -86,7 +86,12 @@ func handlePodEvent(pod *v1.Pod) {
 	// 1. find language for each container from the Pod
 	containerResults := GetAllContainerRuntimes(pod)
 
-	// 2. update the new results
+	// 2. find pod IP to pod details for each Pod
+	podIp, podResults := GetPodDetails(pod)
+
+	ImageStore.SetPodDetails(podIp, podResults)
+
+	// 3. update the new results
 	err := ImageStore.SetContainerRuntimes(containerResults)
 	if err != nil {
 		log.Default().Printf("error %v\n", err)

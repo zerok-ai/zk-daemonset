@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	v1 "k8s.io/api/core/v1"
+)
 
 type Set map[string]bool
 
@@ -19,6 +22,26 @@ type ProcessDetails struct {
 	Runtime     ProgrammingLanguage `json:"runtime"`
 	ProcessName string              `json:"pname"`
 	EnvMap      map[string]string   `json:"env"`
+}
+
+type ContainerDetails struct {
+	Name                  string             `json:"container.name"`
+	Image                 string             `json:"container.image"`
+	ProcessExecutablePath []string           `json:"process.executable.path"`
+	ProcessCommandArgs    []string           `json:"process.command_args"`
+	Ports                 []v1.ContainerPort `json:"ports"`
+}
+
+type PodDetails struct {
+	Containers        []ContainerDetails `json:"containers"`
+	HostArch          string             `json:"host.arch"`
+	HostName          string             `json:"host.name"`
+	K8SDeploymentName string             `json:"k8s.deployment.name"`
+	K8SNamespaceName  string             `json:"k8s.namespace.name"`
+	K8SNodeName       string             `json:"k8s.node.name"`
+	K8SPodName        string             `json:"k8s.pod.name"`
+	ServiceName       string             `json:"service.name"`
+	CreateTS          string             `json:"create_ts"`
 }
 
 type ProgrammingLanguage string
