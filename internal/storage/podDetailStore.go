@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
-	"log"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/models"
@@ -31,7 +30,5 @@ func GetNewPodDetailsStore(configs config.AppConfigs) *PodDetailStore {
 }
 
 func (podDetailStore PodDetailStore) SetPodDetails(podIP string, podDetails models.PodDetails) {
-	if err := podDetailStore.redisClient.Set(ctx, podIP, podDetails, defaultExpiry).Err(); err != nil {
-		log.Default().Printf("error in SetPodDetails %v\n", err)
-	}
+	podDetailStore.redisClient.HMSet(ctx, podIP, map[string]interface{}{"spec": podDetails.Spec, "metadata": podDetails.Metadata})
 }
