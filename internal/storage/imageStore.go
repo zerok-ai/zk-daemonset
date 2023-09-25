@@ -42,7 +42,9 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 }
 
 func (imageStore ImageStore) SetPodDetails(podIP string, podDetails models.PodDetails) {
-	imageStore.redisClient.Set(ctx, podIP, podDetails, defaultExpiry)
+	if err := imageStore.redisClient.Set(ctx, podIP, podDetails, defaultExpiry).Err(); err != nil {
+		log.Default().Printf("error in SetPodDetails %v\n", err)
+	}
 }
 
 func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.ContainerRuntime) error {
