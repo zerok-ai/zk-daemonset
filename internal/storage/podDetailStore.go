@@ -32,6 +32,6 @@ func GetNewPodDetailsStore(configs config.AppConfigs) *PodDetailStore {
 func (podDetailStore PodDetailStore) SetPodDetails(podIP string, podDetails models.PodDetails) {
 	podItems := map[string]interface{}{"spec": podDetails.Spec, "metadata": podDetails.Metadata}
 	if err := podDetailStore.redisClient.HMSet(ctx, podIP, podItems); err != nil {
-		panic(err)
+		fmt.Printf("error in SetPodDetails %v\n", err)
 	}
 }
