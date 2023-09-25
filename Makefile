@@ -33,7 +33,7 @@ docker-push-gke:
 docker-build-push-gke: docker-build-gke docker-push-gke
 
 # ------- CI-CD ------------
-debug:
+debug-build: sync
 	dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient cmd/main.go
 ci-cd-build: sync
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "all=-N -l" -v -o $(NAME) cmd/main.go
