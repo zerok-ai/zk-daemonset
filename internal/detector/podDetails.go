@@ -14,13 +14,18 @@ func GetPodDetails(pod *v1.Pod) (string, models.PodDetails) {
 		containerDetails.ProcessExecutablePath = container.Command
 		containerDetails.Ports = container.Ports
 		containerDetails.ProcessCommandArgs = container.Args
-		podDetails.Containers = append(podDetails.Containers, containerDetails)
+		podDetails.Spec.Containers = append(podDetails.Spec.Containers, containerDetails)
 	}
-	podDetails.K8SNodeName = pod.Spec.NodeName
-	podDetails.CreateTS = pod.GetCreationTimestamp().String()
-	podDetails.K8SNamespaceName = pod.Namespace
-	podDetails.K8SPodName = pod.Name
-	podDetails.K8SDeploymentName = pod.OwnerReferences[0].Name
-	podDetails.ServiceName = pod.OwnerReferences[0].Kind
+	// metadata
+	podDetails.Metadata.NamespaceName = pod.ObjectMeta.Namespace
+	podDetails.Metadata.CreateTS = pod.GetCreationTimestamp().String()
+	podDetails.Metadata.PodName = pod.ObjectMeta.Name
+	podDetails.Metadata.PodId = string(pod.ObjectMeta.UID)
+	podDetails.Metadata.WorkloadName = pod.ObjectMeta.OwnerReferences[0].Name
+	podDetails.Metadata.WorkloadType = pod.ObjectMeta.OwnerReferences[0].Kind
+	// Spec
+	podDetails.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
+	podDetails.Spec.NodeName = pod.Spec.NodeName
+
 	return pod.Status.PodIP, podDetails
 }

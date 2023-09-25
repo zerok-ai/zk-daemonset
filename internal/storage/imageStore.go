@@ -41,12 +41,6 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 	return imgRedis
 }
 
-func (imageStore ImageStore) SetPodDetails(podIP string, podDetails models.PodDetails) {
-	if err := imageStore.redisClient.Set(ctx, podIP, podDetails, defaultExpiry).Err(); err != nil {
-		log.Default().Printf("error in SetPodDetails %v\n", err)
-	}
-}
-
 func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []models.ContainerRuntime) error {
 
 	containerRuntimeObjects = imageStore.getOnlyWriteEligibleRuntimeObjects(containerRuntimeObjects)

@@ -33,15 +33,23 @@ type ContainerDetails struct {
 }
 
 type PodDetails struct {
-	Containers        []ContainerDetails `json:"containers"`
-	HostArch          string             `json:"host_arch"`
-	HostName          string             `json:"host_name"`
-	K8SDeploymentName string             `json:"k8s_deployment_name"`
-	K8SNamespaceName  string             `json:"k8s_namespace_name"`
-	K8SNodeName       string             `json:"k8s_node_name"`
-	K8SPodName        string             `json:"k8s_pod_name"`
-	ServiceName       string             `json:"service_name"`
-	CreateTS          string             `json:"create_ts"`
+	Metadata PodMetadata `json:"metadata"`
+	Spec     PodSpec     `json:"spec"`
+}
+
+type PodMetadata struct {
+	NamespaceName string `json:"namespace_name"`
+	PodName       string `json:"pod_name"`
+	PodId         string `json:"pod_id"`
+	WorkloadName  string `json:"workload_name"`
+	WorkloadType  string `json:"workload_type"`
+	CreateTS      string `json:"create_ts"`
+}
+
+type PodSpec struct {
+	ServiceAccountName string             `json:"service_account_name"`
+	NodeName           string             `json:"node_name"`
+	Containers         []ContainerDetails `json:"containers"`
 }
 
 type ProgrammingLanguage string

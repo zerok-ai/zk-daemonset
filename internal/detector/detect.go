@@ -18,12 +18,14 @@ import (
 )
 
 var (
-	ImageStore *storage.ImageStore
+	ImageStore     *storage.ImageStore
+	PodDetailStore *storage.PodDetailStore
 )
 
 func Start(cfg config.AppConfigs) error {
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
+	PodDetailStore = storage.GetNewPodDetailsStore(cfg)
 
 	// scan existing pods for runtimes
 	err := ScanExistingPods()
@@ -89,7 +91,7 @@ func handlePodEvent(pod *v1.Pod) {
 	// 2. find pod IP to pod details for each Pod
 	podIp, podResults := GetPodDetails(pod)
 
-	ImageStore.SetPodDetails(podIp, podResults)
+	PodDetailStore.SetPodDetails(podIp, podResults)
 
 	// 3. update the new results
 	err := ImageStore.SetContainerRuntimes(containerResults)
