@@ -2,6 +2,7 @@ package detector
 
 import (
 	v1 "k8s.io/api/core/v1"
+	"strings"
 	"zk-daemonset/internal/models"
 )
 
@@ -23,7 +24,7 @@ func GetPodDetails(pod *v1.Pod) (string, models.PodDetails) {
 	podDetails.Metadata.PodId = string(pod.ObjectMeta.UID)
 	podDetails.Metadata.WorkloadName = pod.ObjectMeta.OwnerReferences[0].Name
 	podDetails.Metadata.WorkloadKind = pod.ObjectMeta.OwnerReferences[0].Kind
-	podDetails.Metadata.ServiceName = pod.ObjectMeta.GenerateName[:len(pod.ObjectMeta.GenerateName)-1]
+	podDetails.Metadata.ServiceName = strings.TrimSuffix(pod.ObjectMeta.GenerateName, "-")
 	// Spec
 	podDetails.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 	podDetails.Spec.NodeName = pod.Spec.NodeName
