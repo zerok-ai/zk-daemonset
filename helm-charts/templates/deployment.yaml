@@ -34,11 +34,6 @@ spec:
         image: "{{ index .Values.global.dockerBase}}/{{ index .Values.image.repo}}:{{ index .Values.image.tag}}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: zk-daemonset
-        preStartExec:
-          exec:
-            command: ["go", "install", "github.com/go-delve/delve/cmd/dlv@master"]
-        command: ["dlv"]
-        args: ["--listen=:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "./zk-daemonset", "--", "-c", "config/config.yaml"]
         resources:
           limits:
             cpu: 500m
