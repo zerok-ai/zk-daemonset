@@ -22,9 +22,10 @@ func GetPodDetails(pod *v1.Pod) (string, models.PodDetails) {
 	podDetails.Metadata.PodName = pod.ObjectMeta.Name
 	podDetails.Metadata.PodId = string(pod.ObjectMeta.UID)
 	podDetails.Metadata.WorkloadName = pod.ObjectMeta.OwnerReferences[0].Name
-	podDetails.Metadata.WorkloadType = pod.ObjectMeta.OwnerReferences[0].Kind
+	podDetails.Metadata.WorkloadKind = pod.ObjectMeta.OwnerReferences[0].Kind
 	// Spec
 	podDetails.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
+	podDetails.Spec.ServiceName = pod.ObjectMeta.GenerateName
 	podDetails.Spec.NodeName = pod.Spec.NodeName
 	// Status
 	podDetails.Status.Phase = string(pod.Status.Phase)

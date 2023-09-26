@@ -43,13 +43,14 @@ type PodMetadata struct {
 	PodName       string `json:"pod_name"`
 	PodId         string `json:"pod_id"`
 	WorkloadName  string `json:"workload_name"`
-	WorkloadType  string `json:"workload_type"`
+	WorkloadKind  string `json:"workload_kind"`
 	CreateTS      string `json:"create_ts"`
 }
 
 type PodSpec struct {
 	ServiceAccountName string             `json:"service_account_name"`
 	NodeName           string             `json:"node_name"`
+	ServiceName        string             `json:"service_name"`
 	Containers         []ContainerDetails `json:"containers"`
 }
 

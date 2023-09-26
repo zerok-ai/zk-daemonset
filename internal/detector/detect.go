@@ -90,7 +90,6 @@ func handlePodEvent(pod *v1.Pod) {
 
 	// 2. find pod IP to pod details for each Pod
 	podIp, podResults := GetPodDetails(pod)
-
 	PodDetailStore.SetPodDetails(podIp, podResults)
 
 	// 3. update the new results
