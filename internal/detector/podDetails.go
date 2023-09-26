@@ -17,15 +17,15 @@ func GetPodDetails(pod *v1.Pod) (string, models.PodDetails) {
 		podDetails.Spec.Containers = append(podDetails.Spec.Containers, containerDetails)
 	}
 	// metadata
-	podDetails.Metadata.NamespaceName = pod.ObjectMeta.Namespace
+	podDetails.Metadata.Namespace = pod.ObjectMeta.Namespace
 	podDetails.Metadata.CreateTS = pod.GetCreationTimestamp().String()
 	podDetails.Metadata.PodName = pod.ObjectMeta.Name
 	podDetails.Metadata.PodId = string(pod.ObjectMeta.UID)
 	podDetails.Metadata.WorkloadName = pod.ObjectMeta.OwnerReferences[0].Name
 	podDetails.Metadata.WorkloadKind = pod.ObjectMeta.OwnerReferences[0].Kind
+	podDetails.Metadata.ServiceName = pod.ObjectMeta.GenerateName[:len(pod.ObjectMeta.GenerateName)-1]
 	// Spec
 	podDetails.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
-	podDetails.Spec.ServiceName = pod.ObjectMeta.GenerateName
 	podDetails.Spec.NodeName = pod.Spec.NodeName
 	// Status
 	podDetails.Status.Phase = string(pod.Status.Phase)

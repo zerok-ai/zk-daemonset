@@ -39,18 +39,18 @@ type PodDetails struct {
 }
 
 type PodMetadata struct {
-	NamespaceName string `json:"namespace_name"`
-	PodName       string `json:"pod_name"`
-	PodId         string `json:"pod_id"`
-	WorkloadName  string `json:"workload_name"`
-	WorkloadKind  string `json:"workload_kind"`
-	CreateTS      string `json:"create_ts"`
+	Namespace    string `json:"namespace"`
+	PodName      string `json:"pod_name"`
+	PodId        string `json:"pod_id"`
+	WorkloadName string `json:"workload_name"`
+	WorkloadKind string `json:"workload_kind"`
+	ServiceName  string `json:"service_name"`
+	CreateTS     string `json:"create_ts"`
 }
 
 type PodSpec struct {
 	ServiceAccountName string             `json:"service_account_name"`
 	NodeName           string             `json:"node_name"`
-	ServiceName        string             `json:"service_name"`
 	Containers         []ContainerDetails `json:"containers"`
 }
 

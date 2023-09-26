@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	podDetailExpiry time.Duration = time.Hour * 24 * 30
+	podDetailExpiry time.Duration = time.Duration(time.Minute*30) / time.Second
 )
 
 type PodDetailStore struct {
@@ -43,8 +43,13 @@ func (podDetailStore PodDetailStore) SetPodDetails(podIP string, podDetails mode
 	podItems["spec"] = getSerialisedValue(podDetails.Spec)
 	podItems["metadata"] = getSerialisedValue(podDetails.Metadata)
 	podItems["status"] = getSerialisedValue(podDetails.Status)
-	if err := podDetailStore.redisClient.HMSet(ctx, podIP, podItems); err != nil {
+	if _, err := podDetailStore.redisClient.HMSet(ctx, podIP, podItems).Result(); err != nil {
 		fmt.Printf("error in SetPodDetails %v\n", err)
+		return err
+	}
+	_, err := podDetailStore.redisClient.Expire(ctx, podIP, podDetailExpiry).Result()
+	if err != nil {
+		return err
 	}
 	return nil
 }
