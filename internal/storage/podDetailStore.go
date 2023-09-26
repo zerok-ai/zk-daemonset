@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	podDetailExpiry time.Duration = time.Duration(time.Minute*30) / time.Second
+	podDetailExpiry time.Duration = time.Minute * 30
 )
 
 type PodDetailStore struct {
