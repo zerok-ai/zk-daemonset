@@ -3,6 +3,7 @@ package detector
 import (
 	"context"
 	"fmt"
+	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
@@ -20,6 +21,7 @@ import (
 var (
 	ImageStore     *storage.ImageStore
 	PodDetailStore *storage.PodDetailStore
+	ticker         *zktick.TickerTask
 )
 
 func Start(cfg config.AppConfigs) error {
@@ -34,8 +36,19 @@ func Start(cfg config.AppConfigs) error {
 		return err
 	}
 
+	var duration = 10 * time.Minute
+	ticker = zktick.GetNewTickerTask("scenario_sync", duration, periodicSync)
+	ticker.Start()
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
+}
+
+func periodicSync() {
+	fmt.Printf("periodicSync: \n")
+	err := ScanExistingPods()
+	if err != nil {
+		log.Default().Printf("error in ScanExistingPods %v\n", err)
+	}
 }
 
 func ScanExistingPods() error {
