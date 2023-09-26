@@ -26,6 +26,9 @@ func GetPodDetails(pod *v1.Pod) (string, models.PodDetails) {
 	// Spec
 	podDetails.Spec.ServiceAccountName = pod.Spec.ServiceAccountName
 	podDetails.Spec.NodeName = pod.Spec.NodeName
+	// Status
+	podDetails.Status.Phase = string(pod.Status.Phase)
+	podDetails.Status.PodIP = pod.Status.PodIP
 
 	return pod.Status.PodIP, podDetails
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
@@ -29,9 +30,21 @@ func GetNewPodDetailsStore(configs config.AppConfigs) *PodDetailStore {
 	return imgRedis
 }
 
-func (podDetailStore PodDetailStore) SetPodDetails(podIP string, podDetails models.PodDetails) {
-	podItems := map[string]interface{}{"spec": podDetails.Spec, "metadata": podDetails.Metadata}
+func getSerialisedValue(value interface{}) string {
+	serialized, err := json.Marshal(value)
+	if err != nil {
+		return ""
+	}
+	return string(serialized)
+}
+
+func (podDetailStore PodDetailStore) SetPodDetails(podIP string, podDetails models.PodDetails) error {
+	podItems := map[string]interface{}{}
+	podItems["spec"] = getSerialisedValue(podDetails.Spec)
+	podItems["metadata"] = getSerialisedValue(podDetails.Metadata)
+	podItems["status"] = getSerialisedValue(podDetails.Status)
 	if err := podDetailStore.redisClient.HMSet(ctx, podIP, podItems); err != nil {
 		fmt.Printf("error in SetPodDetails %v\n", err)
 	}
+	return nil
 }

@@ -35,6 +35,7 @@ type ContainerDetails struct {
 type PodDetails struct {
 	Metadata PodMetadata `json:"metadata"`
 	Spec     PodSpec     `json:"spec"`
+	Status   PodStatus   `json:"status"`
 }
 
 type PodMetadata struct {
@@ -52,6 +53,10 @@ type PodSpec struct {
 	Containers         []ContainerDetails `json:"containers"`
 }
 
+type PodStatus struct {
+	Phase string `json:"phase"`
+	PodIP string `json:"pod_ip"`
+}
 type ProgrammingLanguage string
 
 //type ContainerRuntime struct {
