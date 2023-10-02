@@ -24,6 +24,10 @@ var (
 	ticker         *zktick.TickerTask
 )
 
+const (
+	podDetailSyncDuration = 10 * time.Minute
+)
+
 func Start(cfg config.AppConfigs) error {
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
@@ -36,8 +40,7 @@ func Start(cfg config.AppConfigs) error {
 		return err
 	}
 
-	var duration = 10 * time.Minute
-	ticker = zktick.GetNewTickerTask("scenario_sync", duration, periodicSync)
+	ticker = zktick.GetNewTickerTask("scenario_sync", podDetailSyncDuration, periodicSync)
 	ticker.Start()
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
