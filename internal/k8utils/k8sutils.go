@@ -55,6 +55,15 @@ func GetPodsInCurrentNode() (*corev1.PodList, error) {
 	return pods, nil
 }
 
+func GetServicesInCluster() (*corev1.ServiceList, error) {
+	clientSet, err := GetK8sClientSet()
+	if err != nil {
+		return nil, err
+	}
+	services, _ := clientSet.CoreV1().Services("").List(context.Background(), metav1.ListOptions{})
+	return services, nil
+}
+
 func GetCurrentNodeName() string {
 	return os.Getenv("MY_NODE_NAME")
 }

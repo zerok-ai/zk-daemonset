@@ -19,19 +19,19 @@ import (
 )
 
 var (
-	ImageStore     *storage.ImageStore
-	PodDetailStore *storage.PodDetailStore
-	ticker         *zktick.TickerTask
+	ImageStore          *storage.ImageStore
+	ResourceDetailStore *storage.ResourceDetailStore
+	ticker              *zktick.TickerTask
 )
 
 const (
-	podDetailSyncDuration = 10 * time.Minute
+	resourceSyncDuration = 10 * time.Minute
 )
 
 func Start(cfg config.AppConfigs) error {
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
-	PodDetailStore = storage.GetNewPodDetailsStore(cfg)
+	ResourceDetailStore = storage.GetNewPodDetailsStore(cfg)
 
 	// scan existing pods for runtimes
 	err := ScanExistingPods()
@@ -40,7 +40,7 @@ func Start(cfg config.AppConfigs) error {
 		return err
 	}
 
-	ticker = zktick.GetNewTickerTask("pod_sync", podDetailSyncDuration, periodicSync)
+	ticker = zktick.GetNewTickerTask("resource_sync", resourceSyncDuration, periodicSync)
 	ticker.Start()
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
@@ -52,6 +52,24 @@ func periodicSync() {
 	if err != nil {
 		log.Default().Printf("error in ScanExistingPods %v\n", err)
 	}
+	err = scanExistingServices()
+	if err != nil {
+		log.Default().Printf("error in scanExistingServices %v\n", err)
+	}
+}
+
+func scanExistingServices() error {
+	services, err := k8utils.GetServicesInCluster()
+	if err != nil {
+		return err
+	}
+	for _, service := range services.Items {
+		err := storeServiceDetails(&service)
+		if err != nil {
+			log.Default().Printf("error %v\n", err)
+		}
+	}
+	return nil
 }
 
 func ScanExistingPods() error {
@@ -131,11 +149,17 @@ func handlePodEvent(pod *v1.Pod) {
 
 func storePodDetails(pod *v1.Pod) error {
 	podIp, podResults := GetPodDetails(pod)
-	err := PodDetailStore.SetPodDetails(podIp, podResults)
-	if err != nil {
-		return err
+	return ResourceDetailStore.SetPodDetails(podIp, podResults)
+}
+
+func storeServiceDetails(s *v1.Service) error {
+	serviceDetails := models.ServiceDetails{}
+	serviceDetails.Metadata = models.ServiceMetadata{
+		Namespace:   s.ObjectMeta.Namespace,
+		ServiceName: s.ObjectMeta.Name,
 	}
-	return nil
+	serviceIp := s.Spec.ClusterIP
+	return ResourceDetailStore.SetServiceDetails(serviceIp, serviceDetails)
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue

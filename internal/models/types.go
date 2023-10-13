@@ -32,6 +32,15 @@ type ContainerDetails struct {
 	Ports                 []v1.ContainerPort `json:"ports"`
 }
 
+type ServiceDetails struct {
+	Metadata ServiceMetadata `json:"metadata"`
+}
+
+type ServiceMetadata struct {
+	Namespace   string `json:"namespace"`
+	ServiceName string `json:"service_name"`
+}
+
 type PodDetails struct {
 	Metadata PodMetadata `json:"metadata"`
 	Spec     PodSpec     `json:"spec"`
