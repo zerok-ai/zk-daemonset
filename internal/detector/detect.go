@@ -6,6 +6,8 @@ import (
 	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -42,6 +44,15 @@ func Start(cfg config.AppConfigs) error {
 
 	ticker = zktick.GetNewTickerTask("resource_sync", resourceSyncDuration, periodicSync)
 	ticker.Start()
+
+	go func() {
+		log.Default().Printf("Adding watcher to services.")
+		err := AddWatcherToServices()
+		if err != nil {
+			log.Default().Printf("error in AddWatcherToServices %v\n", err)
+		}
+	}()
+
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
 }
@@ -99,6 +110,52 @@ func ScanExistingPods() error {
 	return err
 }
 
+func AddWatcherToServices() error {
+	clientSet, err := k8utils.GetK8sClientSet()
+	if err != nil {
+		return err
+	}
+
+	// Create a SharedInformerFactory for services.
+	factory := informers.NewSharedInformerFactory(clientSet, 0)
+
+	// Create a Service informer.
+	serviceInformer := factory.Core().V1().Services()
+
+	// Add event handlers to the informer.
+	_, err = serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			log.Default().Printf("Add service event received for name %v.", service.Name)
+			handleServiceEvent(service)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			newService := newObj.(*v1.Service)
+			log.Default().Printf("Update service event received for name %v.", newService.Name)
+			handleServiceEvent(newService)
+		},
+		DeleteFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			log.Default().Printf("Delete service event received for name %v.", service.Name)
+			//Do Nothing.
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Start the informer.
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
+
+	// Run the informer until a signal is received.
+	<-wait.NeverStop
+	return nil
+}
+
 func AddWatcherToPods() error {
 	clientSet, err := k8utils.GetK8sClientSet()
 
@@ -122,6 +179,15 @@ func AddWatcherToPods() error {
 
 		handlePodEvent(item.(*v1.Pod))
 		queue.Done(item)
+	}
+}
+
+// handleServiceEvent handles service events
+func handleServiceEvent(service *v1.Service) {
+	fmt.Printf("\n\nhandleServiceEvent: for service %s\n", service.Name)
+	err := storeServiceDetails(service)
+	if err != nil {
+		log.Default().Printf("error %v\n", err)
 	}
 }
 
