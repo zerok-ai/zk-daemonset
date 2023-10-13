@@ -40,7 +40,7 @@ func Start(cfg config.AppConfigs) error {
 		return err
 	}
 
-	ticker = zktick.GetNewTickerTask("scenario_sync", podDetailSyncDuration, periodicSync)
+	ticker = zktick.GetNewTickerTask("pod_sync", podDetailSyncDuration, periodicSync)
 	ticker.Start()
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
@@ -56,10 +56,21 @@ func periodicSync() {
 
 func ScanExistingPods() error {
 
-	// Scan all pods for image data
-	containerResultsFromPods, err := GetContainerResultsForAllPods()
+	podList, err := k8utils.GetPodsInCurrentNode()
 	if err != nil {
 		return err
+	}
+	// Scan all pods for image data
+	containerResultsFromPods, err := GetContainerResultsForAllPods(podList)
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		err := storePodDetails(&pod)
+		if err != nil {
+			log.Default().Printf("error %v\n", err)
+		}
 	}
 
 	// update the new results
@@ -105,15 +116,26 @@ func handlePodEvent(pod *v1.Pod) {
 	containerResults := GetAllContainerRuntimes(pod)
 
 	// 2. find pod IP to pod details for each Pod
-	podIp, podResults := GetPodDetails(pod)
-	PodDetailStore.SetPodDetails(podIp, podResults)
+	err := storePodDetails(pod)
+	if err != nil {
+		log.Default().Printf("error %v\n", err)
+	}
 
 	// 3. update the new results
-	err := ImageStore.SetContainerRuntimes(containerResults)
+	err = ImageStore.SetContainerRuntimes(containerResults)
 	if err != nil {
 		log.Default().Printf("error %v\n", err)
 		return
 	}
+}
+
+func storePodDetails(pod *v1.Pod) error {
+	podIp, podResults := GetPodDetails(pod)
+	err := PodDetailStore.SetPodDetails(podIp, podResults)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
@@ -145,12 +167,8 @@ func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workq
 	go _controller.Run(ctx.Done())
 }
 
-func GetContainerResultsForAllPods() ([]models.ContainerRuntime, error) {
+func GetContainerResultsForAllPods(podList *v1.PodList) ([]models.ContainerRuntime, error) {
 
-	podList, err := k8utils.GetPodsInCurrentNode()
-	if err != nil {
-		return nil, err
-	}
 	containerResults := []models.ContainerRuntime{}
 
 	fmt.Printf("Found %d pods on the node\n", len(podList.Items))
