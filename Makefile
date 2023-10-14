@@ -1,4 +1,6 @@
-NAME = zk-daemonset
+NAME = zk-daemonset-amd64
+NAME_AMD64 = zk-daemonset-amd64
+NAME_ARM64 = zk-daemonset-arm64
 IMAGE_NAME = zk-daemonset
 IMAGE_VERSION = 1.0.2
 
@@ -39,3 +41,7 @@ ci-cd-build: sync
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "all=-N -l" -v -o $(NAME) cmd/main.go
 
 ci-cd-build-migration:
+
+ci-cd-build-client-multiarch:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "all=-N -l" -v -o bin/$(NAME_AMD64) cmd/main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -gcflags "all=-N -l" -v -o bin/$(NAME_ARM64) cmd/main.go
