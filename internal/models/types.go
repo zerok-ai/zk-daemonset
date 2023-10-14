@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	v1 "k8s.io/api/core/v1"
+)
 
 type Set map[string]bool
 
@@ -21,6 +24,49 @@ type ProcessDetails struct {
 	EnvMap      map[string]string   `json:"env"`
 }
 
+type ContainerDetails struct {
+	Name                  string             `json:"container_name"`
+	Image                 string             `json:"container_image"`
+	ProcessExecutablePath []string           `json:"process.executable_path"`
+	ProcessCommandArgs    []string           `json:"process.command_args"`
+	Ports                 []v1.ContainerPort `json:"ports"`
+}
+
+type ServiceDetails struct {
+	Metadata ServiceMetadata `json:"metadata"`
+}
+
+type ServiceMetadata struct {
+	Namespace   string `json:"namespace"`
+	ServiceName string `json:"service_name"`
+}
+
+type PodDetails struct {
+	Metadata PodMetadata `json:"metadata"`
+	Spec     PodSpec     `json:"spec"`
+	Status   PodStatus   `json:"status"`
+}
+
+type PodMetadata struct {
+	Namespace    string `json:"namespace"`
+	PodName      string `json:"pod_name"`
+	PodId        string `json:"pod_id"`
+	WorkloadName string `json:"workload_name"`
+	WorkloadKind string `json:"workload_kind"`
+	ServiceName  string `json:"service_name"`
+	CreateTS     string `json:"create_ts"`
+}
+
+type PodSpec struct {
+	ServiceAccountName string             `json:"service_account_name"`
+	NodeName           string             `json:"node_name"`
+	Containers         []ContainerDetails `json:"containers"`
+}
+
+type PodStatus struct {
+	Phase string `json:"phase"`
+	PodIP string `json:"pod_ip"`
+}
 type ProgrammingLanguage string
 
 //type ContainerRuntime struct {

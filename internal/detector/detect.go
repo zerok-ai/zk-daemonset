@@ -3,8 +3,11 @@ package detector
 import (
 	"context"
 	"fmt"
+	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
@@ -18,12 +21,19 @@ import (
 )
 
 var (
-	ImageStore *storage.ImageStore
+	ImageStore          *storage.ImageStore
+	ResourceDetailStore *storage.ResourceDetailStore
+	ticker              *zktick.TickerTask
+)
+
+const (
+	resourceSyncDuration = 10 * time.Minute
 )
 
 func Start(cfg config.AppConfigs) error {
 	// initialize the image store
 	ImageStore = storage.GetNewImageStore(cfg)
+	ResourceDetailStore = storage.GetNewPodDetailsStore(cfg)
 
 	// scan existing pods for runtimes
 	err := ScanExistingPods()
@@ -32,16 +42,64 @@ func Start(cfg config.AppConfigs) error {
 		return err
 	}
 
+	ticker = zktick.GetNewTickerTask("resource_sync", resourceSyncDuration, periodicSync)
+	ticker.Start()
+
+	go func() {
+		log.Default().Printf("Adding watcher to services.")
+		err := AddWatcherToServices()
+		if err != nil {
+			log.Default().Printf("error in AddWatcherToServices %v\n", err)
+		}
+	}()
+
 	// watch pods as they come up for any new image data
 	return AddWatcherToPods()
 }
 
-func ScanExistingPods() error {
+func periodicSync() {
+	fmt.Printf("periodicSync: \n")
+	err := ScanExistingPods()
+	if err != nil {
+		log.Default().Printf("error in ScanExistingPods %v\n", err)
+	}
+	err = scanExistingServices()
+	if err != nil {
+		log.Default().Printf("error in scanExistingServices %v\n", err)
+	}
+}
 
-	// Scan all pods for image data
-	containerResultsFromPods, err := GetContainerResultsForAllPods()
+func scanExistingServices() error {
+	services, err := k8utils.GetServicesInCluster()
 	if err != nil {
 		return err
+	}
+	for _, service := range services.Items {
+		err := storeServiceDetails(&service)
+		if err != nil {
+			log.Default().Printf("error %v\n", err)
+		}
+	}
+	return nil
+}
+
+func ScanExistingPods() error {
+
+	podList, err := k8utils.GetPodsInCurrentNode()
+	if err != nil {
+		return err
+	}
+	// Scan all pods for image data
+	containerResultsFromPods, err := GetContainerResultsForAllPods(podList)
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		err := storePodDetails(&pod)
+		if err != nil {
+			log.Default().Printf("error %v\n", err)
+		}
 	}
 
 	// update the new results
@@ -50,6 +108,52 @@ func ScanExistingPods() error {
 		return err
 	}
 	return err
+}
+
+func AddWatcherToServices() error {
+	clientSet, err := k8utils.GetK8sClientSet()
+	if err != nil {
+		return err
+	}
+
+	// Create a SharedInformerFactory for services.
+	factory := informers.NewSharedInformerFactory(clientSet, 0)
+
+	// Create a Service informer.
+	serviceInformer := factory.Core().V1().Services()
+
+	// Add event handlers to the informer.
+	_, err = serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			log.Default().Printf("Add service event received for name %v.", service.Name)
+			handleServiceEvent(service)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			newService := newObj.(*v1.Service)
+			log.Default().Printf("Update service event received for name %v.", newService.Name)
+			handleServiceEvent(newService)
+		},
+		DeleteFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			log.Default().Printf("Delete service event received for name %v.", service.Name)
+			//Do Nothing.
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Start the informer.
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
+
+	// Run the informer until a signal is received.
+	<-wait.NeverStop
+	return nil
 }
 
 func AddWatcherToPods() error {
@@ -78,6 +182,15 @@ func AddWatcherToPods() error {
 	}
 }
 
+// handleServiceEvent handles service events
+func handleServiceEvent(service *v1.Service) {
+	fmt.Printf("\n\nhandleServiceEvent: for service %s\n", service.Name)
+	err := storeServiceDetails(service)
+	if err != nil {
+		log.Default().Printf("error %v\n", err)
+	}
+}
+
 // handlePodEvent handles pod events
 func handlePodEvent(pod *v1.Pod) {
 
@@ -86,12 +199,33 @@ func handlePodEvent(pod *v1.Pod) {
 	// 1. find language for each container from the Pod
 	containerResults := GetAllContainerRuntimes(pod)
 
-	// 2. update the new results
-	err := ImageStore.SetContainerRuntimes(containerResults)
+	// 2. find pod IP to pod details for each Pod
+	err := storePodDetails(pod)
+	if err != nil {
+		log.Default().Printf("error %v\n", err)
+	}
+
+	// 3. update the new results
+	err = ImageStore.SetContainerRuntimes(containerResults)
 	if err != nil {
 		log.Default().Printf("error %v\n", err)
 		return
 	}
+}
+
+func storePodDetails(pod *v1.Pod) error {
+	podIp, podResults := GetPodDetails(pod)
+	return ResourceDetailStore.SetPodDetails(podIp, podResults)
+}
+
+func storeServiceDetails(s *v1.Service) error {
+	serviceDetails := models.ServiceDetails{}
+	serviceDetails.Metadata = models.ServiceMetadata{
+		Namespace:   s.ObjectMeta.Namespace,
+		ServiceName: s.ObjectMeta.Name,
+	}
+	serviceIp := s.Spec.ClusterIP
+	return ResourceDetailStore.SetServiceDetails(serviceIp, serviceDetails)
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
@@ -123,12 +257,8 @@ func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workq
 	go _controller.Run(ctx.Done())
 }
 
-func GetContainerResultsForAllPods() ([]models.ContainerRuntime, error) {
+func GetContainerResultsForAllPods(podList *v1.PodList) ([]models.ContainerRuntime, error) {
 
-	podList, err := k8utils.GetPodsInCurrentNode()
-	if err != nil {
-		return nil, err
-	}
 	containerResults := []models.ContainerRuntime{}
 
 	fmt.Printf("Found %d pods on the node\n", len(podList.Items))
