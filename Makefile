@@ -51,6 +51,6 @@ debug-build: sync
 	dlv debug --headless --listen=:2345 --api-version=2 --accept-multiclient cmd/main.go
 ci-cd-build: sync
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/$(NAME_AMD64) cmd/main.go
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/$(NAME_ARM64) cmd/main.go
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o bin/$(NAME_ARM64) cmd/main.go
 
 ci-cd-build-migration:
