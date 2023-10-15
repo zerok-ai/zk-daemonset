@@ -42,7 +42,7 @@ spec:
               - SYS_PTRACE
           volumeMounts:
             - name: daemonset-config
-              mountPath: /opt
+              mountPath: /zk/config
       hostPID: true
 ---
 

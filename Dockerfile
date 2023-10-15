@@ -1,8 +1,24 @@
-FROM golang:1.18-alpine
-WORKDIR /zk
-COPY bin/zk-daemonset-amd64 /zk/zk-daemonset-amd64
-COPY *bin/zk-daemonset-arm64 /zk/zk-daemonset-arm64
-COPY app-start.sh /zk/app-start.sh
-RUN chmod +x /zk/*
+# Dockerfile
 
-CMD ["./app-start.sh","-amd64","zk-daemonset-amd64","-arm64","zk-daemonset-arm64","-c","/opt/config.yaml"]
+# Use Alpine as the base image
+FROM alpine:latest
+
+# Set the working directory inside the container
+WORKDIR /zk
+
+ENV exeBaseName=zk-daemonset
+
+# full path to the all the executables
+ENV exeAMD64="${exeBaseName}-amd64"
+ENV exeARM64="${exeBaseName}-arm64"
+
+# copy the executables
+COPY *"bin/$exeAMD64" .
+COPY *"bin/$exeARM64" .
+
+# copy the start script
+COPY app-start.sh .
+RUN chmod +x app-start.sh
+
+# call the start script
+CMD ["sh","-c","./app-start.sh --amd64 ${exeAMD64} --arm64 ${exeARM64} -c config/config.yaml"]
