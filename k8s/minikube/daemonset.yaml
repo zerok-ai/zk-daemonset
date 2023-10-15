@@ -67,6 +67,9 @@ data:
     server:
       host: localhost
       port: 8080
+    logs:
+      color: true
+      level: DEBUG
 kind: ConfigMap
 metadata:
   name: zk-daemonset

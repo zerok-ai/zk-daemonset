@@ -12,6 +12,9 @@ data:
     server:
       host: localhost
       port: 8080
+    logs:
+      color: {{ .Values.serviceConfigs.logs.color }}
+      level: {{ .Values.serviceConfigs.logs.level }}
 kind: ConfigMap
 metadata:
   labels:

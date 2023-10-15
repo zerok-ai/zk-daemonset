@@ -92,3 +92,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+serviceConfigs:
+  logs:
+    color: true
+    level: DEBUG
