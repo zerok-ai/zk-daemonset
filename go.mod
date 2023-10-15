@@ -2,8 +2,6 @@ module zk-daemonset
 
 go 1.21
 
-toolchain go1.21.0
-
 require (
 	github.com/fntlnz/mountinfo v1.0.1
 	github.com/ilyakaznacheev/cleanenv v1.4.2
