@@ -46,7 +46,7 @@ spec:
             add:
             - SYS_PTRACE
         volumeMounts:
-        - mountPath: /opt
+        - mountPath: /zk/config
           name: daemonset-config
       hostPID: true
       serviceAccountName: zk-daemonset
