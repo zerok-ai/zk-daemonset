@@ -6,7 +6,6 @@ import (
 	redis "github.com/redis/go-redis/v9"
 	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
-	"log"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/models"
@@ -48,7 +47,7 @@ func (imageStore ImageStore) SetContainerRuntimes(containerRuntimeObjects []mode
 	if len(containerRuntimeObjects) < 1 {
 		return nil
 	}
-	log.Default().Printf("found %d new containerRuntimeObjects %v", len(containerRuntimeObjects), containerRuntimeObjects)
+	zklogger.Debug(imageStoreLogTag, "found %d new containerRuntimeObjects %v", len(containerRuntimeObjects), containerRuntimeObjects)
 
 	// serialize the ContainerRuntime struct to JSON
 	valuesToSet := map[string]interface{}{}

@@ -11,7 +11,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	"log"
 	"time"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/inspectors"
@@ -40,7 +39,7 @@ func Start(cfg config.AppConfigs) error {
 	// scan existing pods for runtimes
 	err := ScanExistingPods()
 	if err != nil {
-		log.Default().Printf("error in ScanExistingPods %v\n", err)
+		zklogger.Error(detectLoggerTag, "error in ScanExistingPods %v\n", err)
 		return err
 	}
 
@@ -48,10 +47,10 @@ func Start(cfg config.AppConfigs) error {
 	ticker.Start()
 
 	go func() {
-		log.Default().Printf("Adding watcher to services.")
+		zklogger.Debug(detectLoggerTag, "Adding watcher to services.")
 		err := AddWatcherToServices()
 		if err != nil {
-			log.Default().Printf("error in AddWatcherToServices %v\n", err)
+			zklogger.Error(detectLoggerTag, "error in AddWatcherToServices %v\n", err)
 		}
 	}()
 
@@ -63,11 +62,11 @@ func periodicSync() {
 	zklogger.Debug(detectLoggerTag, "periodicSync: ")
 	err := ScanExistingPods()
 	if err != nil {
-		log.Default().Printf("error in ScanExistingPods %v\n", err)
+		zklogger.Error(detectLoggerTag, "error in ScanExistingPods %v\n", err)
 	}
 	err = scanExistingServices()
 	if err != nil {
-		log.Default().Printf("error in scanExistingServices %v\n", err)
+		zklogger.Error(detectLoggerTag, "error in scanExistingServices %v\n", err)
 	}
 }
 
@@ -79,7 +78,7 @@ func scanExistingServices() error {
 	for _, service := range services.Items {
 		err := storeServiceDetails(&service)
 		if err != nil {
-			log.Default().Printf("error %v\n", err)
+			zklogger.Error(detectLoggerTag, "error %v\n", err)
 		}
 	}
 	return nil
@@ -100,7 +99,7 @@ func ScanExistingPods() error {
 	for _, pod := range podList.Items {
 		err := storePodDetails(&pod)
 		if err != nil {
-			log.Default().Printf("error %v\n", err)
+			zklogger.Error(detectLoggerTag, "error %v\n", err)
 		}
 	}
 
@@ -128,17 +127,17 @@ func AddWatcherToServices() error {
 	_, err = serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			service := obj.(*v1.Service)
-			log.Default().Printf("Add service event received for name %v.", service.Name)
+			zklogger.Debug(detectLoggerTag, "Add service event received for name %v.", service.Name)
 			handleServiceEvent(service)
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			newService := newObj.(*v1.Service)
-			log.Default().Printf("Update service event received for name %v.", newService.Name)
+			zklogger.Debug(detectLoggerTag, "Update service event received for name %v.", newService.Name)
 			handleServiceEvent(newService)
 		},
 		DeleteFunc: func(obj interface{}) {
 			service := obj.(*v1.Service)
-			log.Default().Printf("Delete service event received for name %v.", service.Name)
+			zklogger.Debug(detectLoggerTag, "Delete service event received for name %v.", service.Name)
 			//Do Nothing.
 		},
 	})
@@ -190,7 +189,7 @@ func handleServiceEvent(service *v1.Service) {
 	zklogger.Debug(detectLoggerTag, "handleServiceEvent: for service %s ", service.Name)
 	err := storeServiceDetails(service)
 	if err != nil {
-		log.Default().Printf("error %v\n", err)
+		zklogger.Error(detectLoggerTag, "error %v\n", err)
 	}
 }
 
@@ -205,13 +204,13 @@ func handlePodEvent(pod *v1.Pod) {
 	// 2. find pod IP to pod details for each Pod
 	err := storePodDetails(pod)
 	if err != nil {
-		log.Default().Printf("error %v\n", err)
+		zklogger.Error(detectLoggerTag, "error %v\n", err)
 	}
 
 	// 3. update the new results
 	err = ImageStore.SetContainerRuntimes(containerResults)
 	if err != nil {
-		log.Default().Printf("error %v\n", err)
+		zklogger.Error(detectLoggerTag, "error %v\n", err)
 		return
 	}
 }
