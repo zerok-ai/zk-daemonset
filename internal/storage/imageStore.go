@@ -3,8 +3,8 @@ package storage
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	redis "github.com/redis/go-redis/v9"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
 	"log"
 	"time"
@@ -19,7 +19,8 @@ const (
 )
 
 var (
-	ctx = context.Background()
+	ctx              = context.Background()
+	imageStoreLogTag = "ImageStore"
 )
 
 type ImageStore struct {
@@ -31,7 +32,7 @@ func GetNewImageStore(appConfig config.AppConfigs) *ImageStore {
 
 	dbName := "imageStore"
 	redisConfig := appConfig.Redis
-	fmt.Printf("Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DBs[dbName])
+	zklogger.Debug(imageStoreLogTag, "Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DBs[dbName])
 
 	_redisClient := storage.GetRedisConnection(dbName, redisConfig)
 	imgRedis := &ImageStore{
@@ -168,7 +169,7 @@ func deserializeContainerRuntimeStrings(mapOfContainerRuntimeStrings map[string]
 		var containerRuntime models.ContainerRuntime
 
 		if err := json.Unmarshal([]byte(value), &containerRuntime); err != nil {
-			fmt.Printf("Unable to unmarshal value for key `%s`. Error: %v", key, err)
+			zklogger.Error(imageStoreLogTag, "Unable to unmarshal value for key `%s`. Error: %v", key, err)
 			continue
 		}
 		mapContainerRuntime[key] = &containerRuntime

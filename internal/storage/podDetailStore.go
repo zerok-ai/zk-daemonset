@@ -2,8 +2,8 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/redis/go-redis/v9"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	storage "github.com/zerok-ai/zk-utils-go/storage/redis/config"
 	"time"
 	"zk-daemonset/internal/config"
@@ -12,6 +12,7 @@ import (
 
 const (
 	resourceDetailExpiry time.Duration = time.Minute * 30
+	podDetailsLogTag     string        = "PodDetailsStore"
 )
 
 type ResourceDetailStore struct {
@@ -21,7 +22,7 @@ type ResourceDetailStore struct {
 func GetNewPodDetailsStore(configs config.AppConfigs) *ResourceDetailStore {
 	dbName := "imageStore"
 	redisConfig := configs.Redis
-	fmt.Printf("Host: %s, Port: %s, db = %d\n", redisConfig.Host, redisConfig.Port, redisConfig.DBs[dbName])
+	zklogger.Debug(podDetailsLogTag, "Host: %s, Port: %s, db = %d", redisConfig.Host, redisConfig.Port, redisConfig.DBs[dbName])
 
 	_redisClient := storage.GetRedisConnection(dbName, redisConfig)
 	imgRedis := &ResourceDetailStore{
@@ -44,7 +45,7 @@ func (resourceDetailStore ResourceDetailStore) SetPodDetails(podIP string, podDe
 	podItems["metadata"] = getSerialisedValue(podDetails.Metadata)
 	podItems["status"] = getSerialisedValue(podDetails.Status)
 	if _, err := resourceDetailStore.redisClient.HMSet(ctx, podIP, podItems).Result(); err != nil {
-		fmt.Printf("error in SetPodDetails %v\n", err)
+		zklogger.Error(podDetailsLogTag, "error in SetPodDetails %v\n", err)
 		return err
 	}
 	_, err := resourceDetailStore.redisClient.Expire(ctx, podIP, resourceDetailExpiry).Result()
@@ -58,7 +59,7 @@ func (resourceDetailStore ResourceDetailStore) SetServiceDetails(serviceIP strin
 	items := map[string]interface{}{}
 	items["metadata"] = getSerialisedValue(serviceDetails.Metadata)
 	if _, err := resourceDetailStore.redisClient.HMSet(ctx, serviceIP, items).Result(); err != nil {
-		fmt.Printf("error in SetServiceDetails %v\n", err)
+		zklogger.Error(podDetailsLogTag, "error in SetServiceDetails %v\n", err)
 		return err
 	}
 	_, err := resourceDetailStore.redisClient.Expire(ctx, serviceIP, resourceDetailExpiry).Result()

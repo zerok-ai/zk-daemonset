@@ -1,12 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/kataras/iris/v12"
 	zkConfig "github.com/zerok-ai/zk-utils-go/config"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	"zk-daemonset/internal/config"
 	"zk-daemonset/internal/detector"
 )
+
+var LOG_TAG = "Main"
 
 func healthz(ctx iris.Context) {
 	ctx.WriteString("healthy")
@@ -45,21 +47,21 @@ func newApp() *iris.Application {
 
 func main() {
 
-	fmt.Printf("Hello from daemonset\n")
-
 	// read configuration from the file and environment variables
 	var cfg config.AppConfigs
 	if err := zkConfig.ProcessArgs[config.AppConfigs](&cfg); err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("config redis host:%s and server port: %d\n", cfg.Redis.Host, cfg.Server.Port)
+	zklogger.Init(cfg.LogsConfig)
+
+	zklogger.Debug(LOG_TAG, "Config redis host:%s and server port: %d ", cfg.Redis.Host, cfg.Server.Port)
 
 	app := newApp()
 	config := iris.WithLogLevel("error")
 	go app.Listen(":"+cfg.Server.Port, config)
 
-	fmt.Printf("Started iris application")
+	zklogger.Info(LOG_TAG, "Started iris application")
 
 	// start business logic
 	if err := detector.Start(cfg); err != nil {

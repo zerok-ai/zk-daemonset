@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	"os"
 
 	corev1 "k8s.io/api/core/v1"
@@ -12,6 +13,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
+
+var k8sUtilsLogTag = "k8sUtils"
 
 type patchStringValue struct {
 	Op    string `json:"op"`
@@ -34,9 +37,9 @@ func LabelPod(pod *corev1.Pod, path string, value string) error {
 	_, updateErr := k8sClient.Pods(pod.GetNamespace()).Patch(context.Background(), pod.GetName(), types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
 	if updateErr == nil {
 		logMessage := fmt.Sprintf("Pod %s labeled successfully for Path %s and Value %s.", pod.GetName(), path, value)
-		fmt.Println(logMessage)
+		zklogger.Debug(k8sUtilsLogTag, logMessage)
 	} else {
-		fmt.Println(updateErr)
+		zklogger.Error(k8sUtilsLogTag, updateErr)
 	}
 	return nil
 }

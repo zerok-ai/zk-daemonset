@@ -2,10 +2,13 @@ package inspectors
 
 import (
 	"fmt"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	"os"
 	"zk-daemonset/internal/inspectors/goversion"
 	types "zk-daemonset/internal/models"
 )
+
+var golangInspectorLogTag = "golangInspector"
 
 type golangInspector struct{}
 
@@ -17,13 +20,13 @@ func (g *golangInspector) Inspect(p *types.ProcessDetails) (types.ProgrammingLan
 	file := fmt.Sprintf("/proc/%d/exe", p.ProcessID)
 	_, err := os.Stat(file)
 	if err != nil {
-		fmt.Printf("could not perform os.stat: %s\n", err)
+		zklogger.Error(golangInspectorLogTag, "could not perform os.stat: %s\n", err)
 		return "", false
 	}
 
 	x, err := goversion.OpenExe(file)
 	if err != nil {
-		fmt.Printf("could not perform OpenExe: %s\n", err)
+		zklogger.Error(golangInspectorLogTag, "could not perform OpenExe: %s\n", err)
 		return "", false
 	}
 

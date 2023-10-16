@@ -2,7 +2,7 @@ package detector
 
 import (
 	"context"
-	"fmt"
+	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -25,6 +25,8 @@ var (
 	ResourceDetailStore *storage.ResourceDetailStore
 	ticker              *zktick.TickerTask
 )
+
+var detectLoggerTag = "Detector"
 
 const (
 	resourceSyncDuration = 10 * time.Minute
@@ -58,7 +60,7 @@ func Start(cfg config.AppConfigs) error {
 }
 
 func periodicSync() {
-	fmt.Printf("periodicSync: \n")
+	zklogger.Debug(detectLoggerTag, "periodicSync: ")
 	err := ScanExistingPods()
 	if err != nil {
 		log.Default().Printf("error in ScanExistingPods %v\n", err)
@@ -184,7 +186,8 @@ func AddWatcherToPods() error {
 
 // handleServiceEvent handles service events
 func handleServiceEvent(service *v1.Service) {
-	fmt.Printf("\n\nhandleServiceEvent: for service %s\n", service.Name)
+
+	zklogger.Debug(detectLoggerTag, "handleServiceEvent: for service %s ", service.Name)
 	err := storeServiceDetails(service)
 	if err != nil {
 		log.Default().Printf("error %v\n", err)
@@ -194,7 +197,7 @@ func handleServiceEvent(service *v1.Service) {
 // handlePodEvent handles pod events
 func handlePodEvent(pod *v1.Pod) {
 
-	fmt.Printf("\n\nhandlePodEvent: for pod %s\n", pod.Name)
+	zklogger.Debug(detectLoggerTag, "handlePodEvent: for pod %s", pod.Name)
 
 	// 1. find language for each container from the Pod
 	containerResults := GetAllContainerRuntimes(pod)
@@ -261,7 +264,7 @@ func GetContainerResultsForAllPods(podList *v1.PodList) ([]models.ContainerRunti
 
 	containerResults := []models.ContainerRuntime{}
 
-	fmt.Printf("Found %d pods on the node\n", len(podList.Items))
+	zklogger.Debug(detectLoggerTag, "Found %d pods on the node ", len(podList.Items))
 
 	for _, pod := range podList.Items {
 		temp := GetAllContainerRuntimes(&pod)
@@ -281,7 +284,7 @@ func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
 
 		processes, err := FindProcessInContainer(targetPodUID, container.Name)
 		if err != nil {
-			fmt.Println("error while getting processes of a container ", processes)
+			zklogger.Error(detectLoggerTag, "error while getting processes of a container ", processes)
 			continue
 		}
 		languages, processName := inspectors.DetectLanguageOfAllProcesses(processes)
