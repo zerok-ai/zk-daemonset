@@ -2,6 +2,7 @@ package detector
 
 import (
 	"context"
+	"fmt"
 	zklogger "github.com/zerok-ai/zk-utils-go/logs"
 	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
@@ -223,8 +224,7 @@ func storePodDetails(pod *v1.Pod) error {
 func storeServiceDetails(s *v1.Service) error {
 	serviceDetails := models.ServiceDetails{}
 	serviceDetails.Metadata = models.ServiceMetadata{
-		Namespace:   s.ObjectMeta.Namespace,
-		ServiceName: s.ObjectMeta.Name,
+		ServiceName: fmt.Sprintf("%v/%v", s.ObjectMeta.Namespace, s.ObjectMeta.Name),
 	}
 	serviceIp := s.Spec.ClusterIP
 	return ResourceDetailStore.SetServiceDetails(serviceIp, serviceDetails)

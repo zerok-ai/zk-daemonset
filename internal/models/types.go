@@ -37,7 +37,6 @@ type ServiceDetails struct {
 }
 
 type ServiceMetadata struct {
-	Namespace   string `json:"namespace"`
 	ServiceName string `json:"service_name"`
 }
 
@@ -48,7 +47,6 @@ type PodDetails struct {
 }
 
 type PodMetadata struct {
-	Namespace    string `json:"namespace"`
 	PodName      string `json:"pod_name"`
 	PodId        string `json:"pod_id"`
 	WorkloadName string `json:"workload_name"`
