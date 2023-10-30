@@ -98,7 +98,7 @@ serviceConfigs:
     color: true
     level: DEBUG
 
-promtail:
+zk-promtail:
   zkDaemonsetImage:
     repo: "zk-daemonset"
     pullPolicy: Always

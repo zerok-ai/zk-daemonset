@@ -1,6 +1,6 @@
 dependencies:
-- name: promtail
+- name: zk-promtail
   repository: ""
   version: 6.15.2
-digest: sha256:e1accd014f31d303abc3a062d53025437ce57dc1f3d90cef1add7afa28ce9d80
-generated: "2023-10-30T15:54:11.699459+05:30"
+digest: sha256:90473aaf85e006299ea6171a108c9e2170c77b8a89ac15fad7fb68ef3b0d3100
+generated: "2023-10-30T16:37:13.762101+05:30"

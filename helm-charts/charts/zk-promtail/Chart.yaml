@@ -8,7 +8,7 @@ maintainers:
 - email: lokiproject@googlegroups.com
   name: Loki Maintainers
 - name: unguiculus
-name: promtail
+name: zk-promtail
 sources:
 - https://github.com/grafana/loki
 - https://grafana.com/oss/loki/
