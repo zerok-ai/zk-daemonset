@@ -1,0 +1,6 @@
+dependencies:
+- name: promtail
+  repository: ""
+  version: 6.15.2
+digest: sha256:e1accd014f31d303abc3a062d53025437ce57dc1f3d90cef1add7afa28ce9d80
+generated: "2023-10-30T15:54:11.699459+05:30"
