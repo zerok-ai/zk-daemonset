@@ -160,48 +160,28 @@ func AddWatcherToServices() error {
 
 func AddWatcherToPods() error {
 	clientSet, err := k8utils.GetK8sClientSet()
+
 	if err != nil {
 		return err
 	}
 
-	// Create a SharedInformerFactory for pods.
-	factory := informers.NewSharedInformerFactory(clientSet, 0)
+	// create a context and a work queue
+	ctx := context.Background()
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
-	// Create a Pod informer.
-	podInformer := factory.Core().V1().Pods()
+	// watch for pod events and send them to the workqueue
+	watchPods(ctx, clientSet, queue)
 
-	// Add event handlers to the informer.
-	_, err = podInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			pod := obj.(*v1.Pod)
-			zklogger.Debug(detectLoggerTag, "Add pod event received for name %v.", pod.Name)
-			handlePodEvent(pod) // Adjust this function to handle pod events
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			newPod := newObj.(*v1.Pod)
-			zklogger.Debug(detectLoggerTag, "Update pod event received for name %v.", newPod.Name)
-			handlePodEvent(newPod) // Adjust this function to handle pod events
-		},
-		DeleteFunc: func(obj interface{}) {
-			pod := obj.(*v1.Pod)
-			zklogger.Debug(detectLoggerTag, "Delete pod event received for name %v.", pod.Name)
-			// Do Nothing or handle deletion event if necessary.
-		},
-	})
-	if err != nil {
-		return err
+	// process pod events from the workqueue
+	for {
+		item, shutdown := queue.Get()
+		if shutdown {
+			return nil
+		}
+
+		handlePodEvent(item.(*v1.Pod))
+		queue.Done(item)
 	}
-
-	// Start the informer.
-	stopCh := make(chan struct{})
-	defer close(stopCh)
-
-	factory.Start(stopCh)
-	factory.WaitForCacheSync(stopCh)
-
-	// Run the informer until a signal is received.
-	<-wait.NeverStop
-	return nil
 }
 
 // handleServiceEvent handles service events
