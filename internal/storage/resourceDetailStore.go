@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/redis/go-redis/v9"
 	zklogger "github.com/zerok-ai/zk-utils-go/logs"
@@ -14,6 +15,8 @@ const (
 	resourceDetailExpiry time.Duration = time.Minute * 30
 	podDetailsLogTag     string        = "PodDetailsStore"
 )
+
+var ctx = context.Background()
 
 type ResourceDetailStore struct {
 	redisClient *redis.Client
