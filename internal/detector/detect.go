@@ -7,7 +7,6 @@ import (
 	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -103,44 +102,24 @@ func AddWatcherToServices() error {
 	if err != nil {
 		return err
 	}
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	err = watchServices(clientSet, queue)
 
-	// Create a SharedInformerFactory for services.
-	factory := informers.NewSharedInformerFactory(clientSet, 0)
-
-	// Create a Service informer.
-	serviceInformer := factory.Core().V1().Services()
-
-	// Add event handlers to the informer.
-	_, err = serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			service := obj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Add service event received for name %v.", service.Name)
-			handleServiceEvent(service)
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			newService := newObj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Update service event received for name %v.", newService.Name)
-			handleServiceEvent(newService)
-		},
-		DeleteFunc: func(obj interface{}) {
-			service := obj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Delete service event received for name %v.", service.Name)
-			//Do Nothing.
-		},
-	})
 	if err != nil {
+		zklogger.Error(detectLoggerTag, "error in watchServices %v\n", err)
 		return err
 	}
 
-	// Start the informer.
-	stopCh := make(chan struct{})
-	defer close(stopCh)
+	// process service events from the workqueue
+	for {
+		item, shutdown := queue.Get()
+		if shutdown {
+			return nil
+		}
 
-	factory.Start(stopCh)
-	factory.WaitForCacheSync(stopCh)
-
-	// Run the informer until a signal is received.
-	<-wait.NeverStop
+		handleServiceEvent(item.(*v1.Service))
+		queue.Done(item)
+	}
 	return nil
 }
 
@@ -205,6 +184,41 @@ func storeServiceDetails(s *v1.Service) error {
 	}
 	serviceIp := s.Spec.ClusterIP
 	return ResourceDetailStore.SetServiceDetails(serviceIp, serviceDetails)
+}
+
+func watchServices(clientSet *kubernetes.Clientset, queue workqueue.RateLimitingInterface) error {
+	// Create a SharedInformerFactory for services.
+	factory := informers.NewSharedInformerFactory(clientSet, 0)
+
+	// Create a Service informer.
+	serviceInformer := factory.Core().V1().Services()
+
+	// Add event handlers to the informer.
+	_, err := serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Add service event received for name %v.", service.Name)
+			queue.Add(service)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			newService := newObj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Update service event received for name %v.", newService.Name)
+			queue.Add(newService)
+		},
+		DeleteFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Delete service event received for name %v.", service.Name)
+			//Do Nothing.
+		},
+	})
+	// Start the informer.
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
+
+	return err
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
