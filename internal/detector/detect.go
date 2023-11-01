@@ -91,24 +91,24 @@ func ScanExistingPods() error {
 	if err != nil {
 		return err
 	}
-	// Scan all pods for image data
-	containerResultsFromPods, err := GetContainerResultsForAllPods(podList)
-	if err != nil {
-		return err
-	}
+	//// Scan all pods for image data
+	//containerResultsFromPods, err := GetContainerResultsForAllPods(podList)
+	//if err != nil {
+	//	return err
+	//}
 
 	for _, pod := range podList.Items {
-		err := storePodDetails(&pod)
+		err = storePodDetails(&pod)
 		if err != nil {
 			zklogger.Error(detectLoggerTag, "error %v\n", err)
 		}
 	}
 
 	// update the new results
-	err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
-	if err != nil {
-		return err
-	}
+	//err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
+	//if err != nil {
+	//	return err
+	//}
 	return err
 }
 
