@@ -220,7 +220,7 @@ func handlePodEvent(pod *v1.Pod) {
 	zklogger.Debug(detectLoggerTag, "handlePodEvent: for pod %s", pod.Name)
 
 	// 1. find language for each container from the Pod
-	containerResults := GetAllContainerRuntimes(pod)
+	//containerResults := GetAllContainerRuntimes(pod)
 
 	// 2. find pod IP to pod details for each Pod
 	err := storePodDetails(pod)
@@ -229,11 +229,11 @@ func handlePodEvent(pod *v1.Pod) {
 	}
 
 	// 3. update the new results
-	err = ImageStore.SetContainerRuntimes(containerResults)
-	if err != nil {
-		zklogger.Error(detectLoggerTag, "error %v\n", err)
-		return
-	}
+	//err = ImageStore.SetContainerRuntimes(containerResults)
+	//if err != nil {
+	//	zklogger.Error(detectLoggerTag, "error %v\n", err)
+	//	return
+	//}
 }
 
 func storePodDetails(pod *v1.Pod) error {
