@@ -29,7 +29,7 @@ var (
 var detectLoggerTag = "Detector"
 
 const (
-	resourceSyncDuration = 10 * time.Minute
+	resourceSyncDuration = 2 * time.Minute
 )
 
 func Start(cfg config.AppConfigs) error {
