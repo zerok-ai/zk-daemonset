@@ -7,21 +7,18 @@ import (
 	zktick "github.com/zerok-ai/zk-utils-go/ticker"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 	"time"
 	"zk-daemonset/internal/config"
-	"zk-daemonset/internal/inspectors"
 	"zk-daemonset/internal/k8utils"
 	"zk-daemonset/internal/models"
 	"zk-daemonset/internal/storage"
 )
 
 var (
-	ImageStore          *storage.ImageStore
 	ResourceDetailStore *storage.ResourceDetailStore
 	ticker              *zktick.TickerTask
 )
@@ -33,8 +30,7 @@ const (
 )
 
 func Start(cfg config.AppConfigs) error {
-	// initialize the image store
-	ImageStore = storage.GetNewImageStore(cfg)
+	// initialize the store
 	ResourceDetailStore = storage.GetNewPodDetailsStore(cfg)
 
 	// scan existing pods for runtimes
@@ -91,23 +87,12 @@ func ScanExistingPods() error {
 	if err != nil {
 		return err
 	}
-	// Scan all pods for image data
-	containerResultsFromPods, err := GetContainerResultsForAllPods(podList)
-	if err != nil {
-		return err
-	}
 
 	for _, pod := range podList.Items {
-		err := storePodDetails(&pod)
+		err = storePodDetails(&pod)
 		if err != nil {
 			zklogger.Error(detectLoggerTag, "error %v\n", err)
 		}
-	}
-
-	// update the new results
-	err = ImageStore.SetContainerRuntimes(containerResultsFromPods)
-	if err != nil {
-		return err
 	}
 	return err
 }
@@ -117,44 +102,24 @@ func AddWatcherToServices() error {
 	if err != nil {
 		return err
 	}
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	err = watchServices(clientSet, queue)
 
-	// Create a SharedInformerFactory for services.
-	factory := informers.NewSharedInformerFactory(clientSet, 0)
-
-	// Create a Service informer.
-	serviceInformer := factory.Core().V1().Services()
-
-	// Add event handlers to the informer.
-	_, err = serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			service := obj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Add service event received for name %v.", service.Name)
-			handleServiceEvent(service)
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			newService := newObj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Update service event received for name %v.", newService.Name)
-			handleServiceEvent(newService)
-		},
-		DeleteFunc: func(obj interface{}) {
-			service := obj.(*v1.Service)
-			zklogger.Debug(detectLoggerTag, "Delete service event received for name %v.", service.Name)
-			//Do Nothing.
-		},
-	})
 	if err != nil {
+		zklogger.Error(detectLoggerTag, "error in watchServices %v\n", err)
 		return err
 	}
 
-	// Start the informer.
-	stopCh := make(chan struct{})
-	defer close(stopCh)
+	// process service events from the workqueue
+	for {
+		item, shutdown := queue.Get()
+		if shutdown {
+			return nil
+		}
 
-	factory.Start(stopCh)
-	factory.WaitForCacheSync(stopCh)
-
-	// Run the informer until a signal is received.
-	<-wait.NeverStop
+		handleServiceEvent(item.(*v1.Service))
+		queue.Done(item)
+	}
 	return nil
 }
 
@@ -197,23 +162,14 @@ func handleServiceEvent(service *v1.Service) {
 // handlePodEvent handles pod events
 func handlePodEvent(pod *v1.Pod) {
 
-	zklogger.Debug(detectLoggerTag, "handlePodEvent: for pod %s", pod.Name)
+	zklogger.Debug(detectLoggerTag, "handlePodEvent: for pod ", pod.Name)
 
-	// 1. find language for each container from the Pod
-	containerResults := GetAllContainerRuntimes(pod)
-
-	// 2. find pod IP to pod details for each Pod
+	// 1. find pod IP to pod details for each Pod
 	err := storePodDetails(pod)
 	if err != nil {
 		zklogger.Error(detectLoggerTag, "error %v\n", err)
 	}
 
-	// 3. update the new results
-	err = ImageStore.SetContainerRuntimes(containerResults)
-	if err != nil {
-		zklogger.Error(detectLoggerTag, "error %v\n", err)
-		return
-	}
 }
 
 func storePodDetails(pod *v1.Pod) error {
@@ -228,6 +184,41 @@ func storeServiceDetails(s *v1.Service) error {
 	}
 	serviceIp := s.Spec.ClusterIP
 	return ResourceDetailStore.SetServiceDetails(serviceIp, serviceDetails)
+}
+
+func watchServices(clientSet *kubernetes.Clientset, queue workqueue.RateLimitingInterface) error {
+	// Create a SharedInformerFactory for services.
+	factory := informers.NewSharedInformerFactory(clientSet, 0)
+
+	// Create a Service informer.
+	serviceInformer := factory.Core().V1().Services()
+
+	// Add event handlers to the informer.
+	_, err := serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Add service event received for name %v.", service.Name)
+			queue.Add(service)
+		},
+		UpdateFunc: func(oldObj, newObj interface{}) {
+			newService := newObj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Update service event received for name %v.", newService.Name)
+			queue.Add(newService)
+		},
+		DeleteFunc: func(obj interface{}) {
+			service := obj.(*v1.Service)
+			zklogger.Debug(detectLoggerTag, "Delete service event received for name %v.", service.Name)
+			//Do Nothing.
+		},
+	})
+	// Start the informer.
+	stopCh := make(chan struct{})
+	defer close(stopCh)
+
+	factory.Start(stopCh)
+	factory.WaitForCacheSync(stopCh)
+
+	return err
 }
 
 // watchPods watches for pod events of pods in current node and sends them to a workqueue
@@ -257,58 +248,4 @@ func watchPods(ctx context.Context, clientset *kubernetes.Clientset, queue workq
 
 	// run the pod watcher
 	go _controller.Run(ctx.Done())
-}
-
-func GetContainerResultsForAllPods(podList *v1.PodList) ([]models.ContainerRuntime, error) {
-
-	containerResults := []models.ContainerRuntime{}
-
-	zklogger.Debug(detectLoggerTag, "Found %d pods on the node ", len(podList.Items))
-
-	for _, pod := range podList.Items {
-		temp := GetAllContainerRuntimes(&pod)
-		containerResults = append(containerResults, temp...)
-	}
-	return containerResults, nil
-}
-
-func GetAllContainerRuntimes(pod *v1.Pod) []models.ContainerRuntime {
-
-	targetPodUID := string(pod.UID)
-	targetContainers := pod.Status.ContainerStatuses
-
-	// iterate through the containers
-	containerResults := []models.ContainerRuntime{}
-	for _, container := range targetContainers {
-
-		processes, err := FindProcessInContainer(targetPodUID, container.Name)
-		if err != nil {
-			zklogger.Error(detectLoggerTag, "error while getting processes of a container ", processes)
-			continue
-		}
-		languages, processName := inspectors.DetectLanguageOfAllProcesses(processes)
-
-		var cmdArray []string
-		envMap := make(map[string]string)
-
-		for _, process := range processes {
-			cmdArray = append(cmdArray, process.CmdLine)
-			for key, value := range process.EnvMap {
-				envMap[key] = value
-			}
-		}
-
-		if len(languages) > 0 {
-			containerResults = append(containerResults, models.ContainerRuntime{
-				Image:    container.Image,
-				ImageID:  container.ImageID,
-				Language: languages,
-				Process:  processName,
-				Cmd:      cmdArray,
-				EnvMap:   envMap,
-			})
-		}
-
-	}
-	return containerResults
 }

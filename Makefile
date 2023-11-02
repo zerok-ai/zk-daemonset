@@ -18,7 +18,7 @@ sync:
 	go get -v ./...
 
 build: sync
-	go build -v -o $(NAME) cmd/main.go
+	go build -o $(NAME) cmd/main.go
 
 
 
